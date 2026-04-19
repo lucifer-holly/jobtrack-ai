@@ -1,0 +1,3310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobTrack AI · 校招求职管理看板 | 作品集 by 于浩利</title>
+<meta name="description" content="于浩利(@lucifer-holly)的AI产品作品。专为校招求职者设计的AI原生申请管理工具,集看板/日历/数据分析/智能邮箱于一体,集成 GLM+Gemini 双引擎 AI。">
+
+<!-- Preconnect critical CDNs (non-blocking speed-up) -->
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+
+<!-- Google Fonts · async load, no render blocking. Falls back to system fonts if slow. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Space+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap"
+  rel="stylesheet"
+  media="print"
+  onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Space+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+
+<!-- Tailwind Play CDN · dynamic (required for custom theme config) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          'display': ['Fraunces', 'serif'],
+          'sans': ['Space Grotesk', 'system-ui', 'sans-serif'],
+          'mono': ['IBM Plex Mono', 'monospace'],
+        },
+        colors: {
+          // Neutral grays (replacing ink)
+          'ink': {
+            50: '#f8fafc',
+            100: '#f1f5f9',
+            200: '#e2e8f0',
+            300: '#cbd5e1',
+            400: '#94a3b8',
+            500: '#64748b',
+            600: '#475569',
+            700: '#334155',
+            800: '#1e293b',
+            900: '#0f172a',
+          },
+          // Primary brand: vibrant emerald (energy, growth)
+          'brand': {
+            50: '#ecfdf5',
+            100: '#d1fae5',
+            200: '#a7f3d0',
+            300: '#6ee7b7',
+            400: '#34d399',
+            500: '#10b981',
+            600: '#059669',
+            700: '#047857',
+          },
+          // Accent colors (fresh palette)
+          'accent': {
+            orange: '#f59e0b',   // warm amber (urgency)
+            coral: '#f43f5e',    // coral red (CTA, alert)
+            sky: '#3b82f6',      // bright blue (info)
+            violet: '#a78bfa',   // violet (creative)
+            mint: '#34d399',     // mint (success)
+            sunny: '#fbbf24',    // sunny yellow (highlight)
+          }
+        }
+      }
+    }
+  }
+</script>
+
+<!-- React + ReactDOM + Babel · unpkg CDN -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+  html, body { background: #f8fafc; }
+  body { font-family: 'Space Grotesk', system-ui, sans-serif; color: #0f172a; -webkit-font-smoothing: antialiased; }
+  .font-display { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f8fafc; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+  /* Smooth entry animation */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+    100% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+  }
+  .pulse-ring { animation: pulse-ring 1.5s infinite; }
+
+  /* Bouncy floating animation for FAB */
+  @keyframes float-bounce {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+  }
+  .float-bounce { animation: float-bounce 3s ease-in-out infinite; }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+  .sparkle-icon { animation: sparkle 2s ease-in-out infinite; }
+
+  /* Fresh gradient background */
+  .paper-bg {
+    background-color: #f8fafc;
+    background-image:
+      radial-gradient(at 10% 0%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
+      radial-gradient(at 90% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(251, 191, 36, 0.03) 0px, transparent 50%);
+  }
+
+  .kanban-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .kanban-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.06);
+  }
+
+  .kanban-card:hover .ai-quick-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .editorial-rule {
+    position: relative;
+  }
+  .editorial-rule::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 4px;
+    width: 20px; height: 2px;
+    background: #10b981;
+    border-radius: 2px;
+  }
+
+  /* Dragover highlight */
+  .drag-over {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: #10b981 !important;
+  }
+
+  /* Loading dots */
+  @keyframes loading-dot {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+  }
+  .loading-dot { animation: loading-dot 1.4s infinite both; }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* Rainbow shimmer for AI buttons */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .ai-shimmer {
+    background: linear-gradient(110deg, #10b981 0%, #3b82f6 25%, #a78bfa 50%, #f59e0b 75%, #10b981 100%);
+    background-size: 200% 100%;
+    animation: shimmer 4s linear infinite;
+  }
+
+  /* AI gradient button style */
+  .ai-gradient-btn {
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    color: white;
+  }
+  .ai-gradient-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #2563eb 100%);
+  }
+
+  /* Prose for AI output */
+  .ai-prose { line-height: 1.75; font-size: 14px; color: #334155; }
+  .ai-prose strong { font-weight: 600; color: #0f172a; }
+  .ai-prose h3 { font-weight: 600; margin-top: 14px; margin-bottom: 8px; color: #10b981; font-size: 15px; }
+  .ai-prose ul { list-style: disc; padding-left: 20px; margin: 8px 0; }
+  .ai-prose ol { list-style: decimal; padding-left: 20px; margin: 8px 0; }
+  .ai-prose li { margin-bottom: 4px; }
+  .ai-prose p { margin-bottom: 8px; }
+  .ai-prose code { background: #ecfdf5; color: #047857; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  /* FAB pulse on hover */
+  .fab-btn {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .fab-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 16px 40px rgba(16, 185, 129, 0.35);
+  }
+</style>
+</head>
+<body>
+<div id="root">
+  <!-- Loading skeleton · shown until React hydrates -->
+  <div id="app-loader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;z-index:9999;font-family:-apple-system,system-ui,'PingFang SC','Microsoft YaHei',sans-serif;">
+    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;color:white;font-size:24px;font-weight:600;font-style:italic;box-shadow:0 10px 24px -8px rgba(16,185,129,0.3);margin-bottom:16px;">J</div>
+    <div style="font-size:18px;font-weight:300;letter-spacing:-0.01em;color:#0f172a;margin-bottom:4px;">JobTrack <span style="font-style:italic;color:#10b981;font-weight:500;">AI</span></div>
+    <div style="font-size:11px;letter-spacing:0.2em;color:#64748b;margin-bottom:16px;text-transform:uppercase;">Campus Recruitment, Mastered.</div>
+    <div style="display:flex;gap:4px;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;animation:lpulse 1.4s infinite both;"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;animation:lpulse 1.4s 0.2s infinite both;"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;animation:lpulse 1.4s 0.4s infinite both;"></span>
+    </div>
+    <div style="margin-top:20px;font-size:11px;color:#94a3b8;">首次加载需从 CDN 获取资源,约 2-5 秒...</div>
+  </div>
+  <style>
+    @keyframes lpulse { 0%,80%,100% { opacity:0.2; transform:scale(0.8); } 40% { opacity:1; transform:scale(1); } }
+  </style>
+</div>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+// ============================================================================
+// ⚙️ 演示版配置 · DEMO CONFIG
+// ----------------------------------------------------------------------------
+// 修改下面两项,部署后面试官打开链接无需配置即可体验 AI 功能
+// ⚠️ 警告:API Key 会在前端源码中可见,建议使用专门的"演示 Key"
+//         提交完成后 2-3 周内,记得到 Google AI Studio 删除此 Key
+// ============================================================================
+const DEMO_CONFIG = {
+  // ① 默认使用的 AI 提供商 · 'glm'(国内稳定,推荐) 或 'gemini'(海外能力)
+  DEFAULT_PROVIDER: 'glm',
+
+  // ② 智谱 GLM API Key(国内可直接访问,前往 https://open.bigmodel.cn/ 免费申请)
+  //    注册送免费额度,GLM-4-Flash 模型完全免费
+  GLM_API_KEY: '在这里粘贴你的_GLM_KEY',
+
+  // ③ Google Gemini API Key(前往 https://aistudio.google.com/apikey 免费申请)
+  //    注意:Gemini API 在中国大陆需要特殊网络环境才能访问
+  GEMINI_API_KEY: 'AIza_在这里粘贴你的_KEY',
+
+  // ② 预填简历(用于 AI 简历匹配度分析功能)
+  //    默认是虚构的"李明"简历,你可以保持不变,或换成自己脱敏版的简历
+  RESUME: `# 李明
+
+**个人信息**
+- 性别:男  出生年月:1999.05
+- 民族:汉族  政治面貌:中共党员
+- 现居城市:上海  意向城市:上海/深圳/北京
+- 邮箱:liming.demo@example.com  电话:138****0199
+- 求职意向:AI产品经理 / AI解决方案 / 数据产品
+
+---
+
+## 教育经历
+
+**香港理工大学(QS100)** · 数据科学与人工智能 · 硕士 · 2025.08 - 2026.07
+- 核心课程:大数据分析、深度学习、自然语言处理、云计算、推荐系统
+- GPA:3.85/4.3(Distinction 等级)
+
+**东南大学(985)** · 计算机科学与技术 · 本科 · 2021.09 - 2025.06
+- GPA:3.2/4.0(专业排名 前40%)
+- 核心课程:数据结构与算法、机器学习、数据库系统、操作系统、人工智能导论
+
+## 荣誉奖项
+
+- 国家奖学金(2023学年)
+- 东南大学优秀学生奖学金(2022、2023)
+- 美国大学生数学建模竞赛 Honorable Mention(2023)
+- 东南大学 AI 创新挑战赛 校级二等奖(2024)
+
+---
+
+## 实习经历
+
+### 字节跳动 · 产品经理实习生(抖音电商) · 2024.07 - 2024.12
+- 负责直播电商"新商家冷启动"场景的C端推荐产品优化,独立完成从需求定义、数据分析到 AB 实验的全链路产品工作
+- 基于用户行为数据搭建新商家标签体系,输出的流量扶持策略上线后,新商家首月 GMV 提升 23%,首单转化率提升 18%
+- 主导一次大促期间的推荐模块改版,通过 AB 实验验证新策略的长期留存正向提升 4.7pp,方案被纳入常态化运营
+- 每周同多个算法团队、运营团队、设计团队对齐需求,积累了B+C端复合产品协作经验
+
+### 商汤科技 · AI 产品实习生(智能客服事业部) · 2023.07 - 2023.10
+- 参与企业级智能客服产品"商汤慧答"的功能迭代,负责对话理解模块的效果评测与产品化优化
+- 独立完成 3 份竞品分析报告(对比百度、阿里、火山等竞品),提出差异化的"行业知识库快速上架"功能点
+- 撰写 5 份 PRD 文档,推动 2 个功能模块从需求到上线,覆盖金融、零售 2 个垂直行业客户
+- 配合算法团队设计 Bad Case 归因标签体系,帮助模型幻觉率下降 12%
+
+---
+
+## 项目经历
+
+### 法律咨询 AI Agent 系统 · 校企合作课题负责人 · 2024.03 - 2024.06
+- 与上海某律所合作,主导基于 Qwen2.5-72B 的法律咨询 Agent 产品原型设计与落地
+- 完成 5000+ 份法律文书的知识库构建(文档分块 + 向量化 + Milvus 存储),设计多级 RAG 检索策略
+- 通过 Prompt Engineering 调优和 Few-shot 示例库建设,将法律条款引用准确率从 68% 提升至 91%
+- 项目获评学校年度 SRTP 优秀项目,并作为合作律所的内部演示版本使用
+
+### Kaggle 信贷违约预测比赛 · 个人 · 2023.09 - 2023.11
+- Top 5%(银牌),使用 LightGBM + CatBoost 模型融合 + 时序特征工程
+- 独立完成数据清洗、特征构建、模型调优、结果提交全流程
+
+### 基于 LSTM 的短视频流量预测 · 本科毕业设计 · 2024.09 - 2025.05
+- 爬取并处理抖音 50 万条短视频公开数据,构建用户-内容-时间三维特征矩阵
+- 基于 PyTorch 搭建 LSTM 模型,24小时流量预测准确率达 87.3%
+- 毕业设计评优秀(前 5%)
+
+---
+
+## 专业技能
+
+- **AI 应用能力**:深度使用 Claude、ChatGPT、Gemini 等主流大模型超 2 年,具备 Prompt Engineering、RAG 方案设计、AI Agent 配置等实战经验;能准确判断大模型能力边界并将其转化为产品功能
+- **编程与数据**:Python(熟练)、SQL(熟练)、JavaScript(基础);熟悉 Pandas、Scikit-learn、PyTorch、LangChain
+- **产品工具**:Axure、Figma、Tableau、Mixpanel;熟悉 AB 实验方法论和数据驱动的产品决策流程
+- **语言能力**:英语 CET-6 642分,雅思 7.5(港校全英文授课环境);普通话
+
+---
+
+## 自我评价
+
+- 东南大学(985)计算机本科 + 香港理工大学(QS100)硕士,计算机技术与 AI 产品的复合背景
+- 头部大厂 B+C 端产品实习经验,熟悉从需求定义到 AB 实验的产品全流程
+- 对 LLM、RAG、Agent 等 AI 原生技术有深度实践经验,能胜任 AI 产品经理岗位
+- 工作作风扎实,数据敏感度高,跨团队沟通能力强`,
+};
+// ============================================================================
+
+// ========================================
+// CONSTANTS
+// ========================================
+const STATUSES = [
+  { id: 'planning', label: '待投递', color: '#64748b', bg: '#f1f5f9' },
+  { id: 'applied',  label: '已投递', color: '#3b82f6', bg: '#dbeafe' },
+  { id: 'written',  label: '笔试中', color: '#a78bfa', bg: '#ede9fe' },
+  { id: 'interview',label: '面试中', color: '#f59e0b', bg: '#fef3c7' },
+  { id: 'offer',    label: 'Offer', color: '#10b981', bg: '#d1fae5' },
+  { id: 'closed',   label: '已截止', color: '#94a3b8', bg: '#f1f5f9' },
+];
+
+const PRIORITY = {
+  high:   { label: '紧急', color: '#f43f5e' },
+  medium: { label: '常规', color: '#64748b' },
+  low:    { label: '备选', color: '#cbd5e1' },
+};
+
+const TRACKS = {
+  ai:       { label: 'AI产品', color: '#10b981' },
+  ict:      { label: 'ICT售前', color: '#a78bfa' },
+  mobility: { label: '出行产品', color: '#3b82f6' },
+  soe:      { label: '国企数科', color: '#f59e0b' },
+};
+
+// ========================================
+// DEMO DATA (完全虚构)
+// ========================================
+const DEMO_JOBS = [
+  {
+    id: 'j01', company: 'ByteDance', role: 'AI产品经理 - 大模型应用', department: '火山引擎',
+    city: '北京', salary: '28-45K · 15薪', salaryMin: 28, salaryMax: 45,
+    status: 'interview', priority: 'high', track: 'ai',
+    source: '校招官网', deadline: '2026-05-15', appliedAt: '2026-04-02',
+    jd: '负责火山引擎大模型应用产品的规划与落地,包括但不限于Agent平台、RAG解决方案、企业知识库产品。要求:1)计算机/人工智能相关专业硕士及以上;2)对LLM、Agent、RAG等AI技术有深度理解;3)具备B端产品0-1经验优先;4)优秀的跨团队沟通能力。',
+    tags: ['大模型', 'Agent', 'B端'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-02' },
+      { name: 'Cover Letter', status: 'submitted', date: '2026-04-02' },
+      { name: 'Poffices项目文档', status: 'pending' },
+    ],
+    timeline: [
+      { date: '2026-04-02', event: '投递简历', type: 'apply' },
+      { date: '2026-04-06', event: '通过简历筛选', type: 'pass' },
+      { date: '2026-04-10', event: '完成笔试', type: 'test' },
+      { date: '2026-04-15', event: '一面通过', type: 'interview' },
+      { date: '2026-04-22', event: '二面(技术+产品)', type: 'upcoming' },
+    ],
+    nextAction: '4月22日 14:00 视频二面',
+    nextActionDate: '2026-04-22',
+  },
+  {
+    id: 'j02', company: 'Alibaba', role: 'AI产品运营 - 通义千问', department: '阿里云智能',
+    city: '杭州', salary: '25-35K · 16薪', salaryMin: 25, salaryMax: 35,
+    status: 'interview', priority: 'high', track: 'ai',
+    source: '内推', deadline: '2026-05-20', appliedAt: '2026-04-05',
+    jd: '负责通义千问C端产品的用户运营与增长策略,制定内容运营、活动运营、社区运营方案。要求有AI工具深度使用经验,熟悉Prompt Engineering,具备数据驱动的产品思维。',
+    tags: ['C端运营', 'AI工具', '内容运营'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-05' },
+      { name: 'AI工具使用案例集', status: 'submitted', date: '2026-04-07' },
+    ],
+    timeline: [
+      { date: '2026-04-05', event: '通过内推投递', type: 'apply' },
+      { date: '2026-04-09', event: 'HR初筛通过', type: 'pass' },
+      { date: '2026-04-16', event: '部门一面', type: 'interview' },
+      { date: '2026-04-23', event: '交叉面', type: 'upcoming' },
+    ],
+    nextAction: '4月23日 交叉面',
+    nextActionDate: '2026-04-23',
+  },
+  {
+    id: 'j03', company: 'Tencent', role: '产品策划 - 腾讯元宝', department: 'CSIG',
+    city: '深圳', salary: '22-32K · 14薪', salaryMin: 22, salaryMax: 32,
+    status: 'written', priority: 'high', track: 'ai',
+    source: 'join.qq.com', deadline: '2026-04-30', appliedAt: '2026-04-10',
+    jd: '负责腾讯元宝AI助手的核心功能规划,承担产品需求分析、竞品调研、用户体验优化工作。',
+    tags: ['AI助手', 'C端产品'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-10' },
+    ],
+    timeline: [
+      { date: '2026-04-10', event: '投递简历', type: 'apply' },
+      { date: '2026-04-14', event: '笔试邀请', type: 'test' },
+      { date: '2026-04-19', event: '笔试完成', type: 'test' },
+    ],
+    nextAction: '等待笔试结果',
+    nextActionDate: '2026-04-25',
+  },
+  {
+    id: 'j04', company: 'MiniMax', role: '海螺AI产品经理', department: 'C端产品组',
+    city: '上海', salary: '25-38K · 14薪', salaryMin: 25, salaryMax: 38,
+    status: 'applied', priority: 'high', track: 'ai',
+    source: '官网校招', deadline: '2026-06-30', appliedAt: '2026-04-12',
+    jd: '负责海螺AI语音助手产品规划,需要对多模态交互、语音合成有深刻理解,能独立主导功能从0到1的落地。',
+    tags: ['多模态', '语音', 'C端'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-12' },
+    ],
+    timeline: [
+      { date: '2026-04-12', event: '投递简历', type: 'apply' },
+    ],
+    nextAction: '等待简历筛选',
+    nextActionDate: '2026-04-26',
+  },
+  {
+    id: 'j05', company: '深信服', role: '售前产品经理 - AI安全方向', department: '售前体系',
+    city: '深圳', salary: '18-28K · 13薪', salaryMin: 18, salaryMax: 28,
+    status: 'interview', priority: 'medium', track: 'ict',
+    source: '校招官网', deadline: '2026-05-06', appliedAt: '2026-04-03',
+    jd: '面向企业客户提供AI安全解决方案的售前支持,负责需求梳理、方案设计、产品演示与技术答辩。要求有B端交付经验,良好的客户沟通能力。',
+    tags: ['售前', 'B端', 'AI安全'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-03' },
+      { name: '解决方案案例', status: 'submitted', date: '2026-04-08' },
+    ],
+    timeline: [
+      { date: '2026-04-03', event: '投递简历', type: 'apply' },
+      { date: '2026-04-08', event: '简历通过', type: 'pass' },
+      { date: '2026-04-17', event: '业务一面', type: 'interview' },
+      { date: '2026-04-24', event: '终面', type: 'upcoming' },
+    ],
+    nextAction: '4月24日 终面',
+    nextActionDate: '2026-04-24',
+  },
+  {
+    id: 'j06', company: '新华三', role: '售前技术工程师', department: '解决方案部',
+    city: '杭州', salary: '17-25K · 13薪', salaryMin: 17, salaryMax: 25,
+    status: 'applied', priority: 'medium', track: 'ict',
+    source: '校招官网', deadline: '2026-06-15', appliedAt: '2026-04-11',
+    jd: '提供云计算、网络、智慧园区等领域的售前技术方案,支持销售完成客户开发与需求响应。',
+    tags: ['云计算', '网络', '智慧园区'],
+    materials: [
+      { name: '国企版简历.pdf', status: 'submitted', date: '2026-04-11' },
+    ],
+    timeline: [
+      { date: '2026-04-11', event: '投递简历', type: 'apply' },
+    ],
+    nextAction: '等待简历筛选',
+    nextActionDate: '2026-04-28',
+  },
+  {
+    id: 'j07', company: '蔚来汽车', role: 'AI产品经理 - 智能座舱', department: 'NIO OS产品',
+    city: '上海', salary: '24-36K · 14薪', salaryMin: 24, salaryMax: 36,
+    status: 'written', priority: 'high', track: 'mobility',
+    source: '官网校招', deadline: '2026-05-31', appliedAt: '2026-04-08',
+    jd: '负责智能座舱AI交互产品,包括语音助手NOMI的多模态能力规划、用户体验设计、场景化功能落地。',
+    tags: ['智能座舱', '多模态', 'NOMI'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-08' },
+    ],
+    timeline: [
+      { date: '2026-04-08', event: '投递简历', type: 'apply' },
+      { date: '2026-04-13', event: '简历通过', type: 'pass' },
+      { date: '2026-04-18', event: '笔试邀请', type: 'test' },
+    ],
+    nextAction: '4月21日前完成笔试',
+    nextActionDate: '2026-04-21',
+  },
+  {
+    id: 'j08', company: '美团', role: 'AI产品经理 - LLM应用', department: '核心本地商业',
+    city: '北京', salary: '26-40K · 16薪', salaryMin: 26, salaryMax: 40,
+    status: 'offer', priority: 'high', track: 'ai',
+    source: '校招官网', deadline: '2026-05-31', appliedAt: '2026-03-28',
+    jd: '负责LLM在外卖、到店等核心场景的应用落地,探索Agent化的业务流程重塑机会。',
+    tags: ['LLM', '本地生活', 'Agent'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-03-28' },
+      { name: 'AI产品思考.pdf', status: 'submitted', date: '2026-04-01' },
+    ],
+    timeline: [
+      { date: '2026-03-28', event: '投递简历', type: 'apply' },
+      { date: '2026-04-01', event: '笔试通过', type: 'test' },
+      { date: '2026-04-06', event: '一面通过', type: 'interview' },
+      { date: '2026-04-11', event: '二面通过', type: 'interview' },
+      { date: '2026-04-16', event: '终面通过', type: 'interview' },
+      { date: '2026-04-18', event: 'Offer Call', type: 'offer' },
+    ],
+    nextAction: 'Offer待决策 (5月5日前)',
+    nextActionDate: '2026-05-05',
+    offerDetail: { salary: '30K × 16薪', location: '北京', level: 'P1' },
+  },
+  {
+    id: 'j09', company: '滴滴', role: '策略产品经理', department: '网约车产品',
+    city: '北京', salary: '23-35K · 14薪', salaryMin: 23, salaryMax: 35,
+    status: 'applied', priority: 'medium', track: 'mobility',
+    source: '校招官网', deadline: '2026-05-31', appliedAt: '2026-04-13',
+    jd: '负责网约车核心策略产品,包括定价策略、派单策略、供需平衡机制,需要较强的数据分析能力和策略思维。',
+    tags: ['策略', '网约车'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-13' },
+    ],
+    timeline: [
+      { date: '2026-04-13', event: '投递简历', type: 'apply' },
+    ],
+    nextAction: '等待简历筛选',
+    nextActionDate: '2026-04-27',
+  },
+  {
+    id: 'j10', company: '科大讯飞', role: 'AI产品经理 - 星火大模型', department: '研究院',
+    city: '合肥', salary: '20-30K · 14薪', salaryMin: 20, salaryMax: 30,
+    status: 'planning', priority: 'medium', track: 'ai',
+    source: '校招官网', deadline: '2026-05-31', appliedAt: null,
+    jd: '负责星火大模型在教育、医疗、工业等垂直场景的产品化,推动行业解决方案落地。',
+    tags: ['大模型', '行业应用'],
+    materials: [],
+    timeline: [],
+    nextAction: '待投递 - 需修改简历',
+    nextActionDate: '2026-04-22',
+  },
+  {
+    id: 'j11', company: 'Kuaishou', role: 'AI内容策略产品经理', department: '主站产品',
+    city: '北京', salary: '22-32K · 15薪', salaryMin: 22, salaryMax: 32,
+    status: 'planning', priority: 'medium', track: 'ai',
+    source: '校招官网', deadline: '2026-05-10', appliedAt: null,
+    jd: '负责短视频AI推荐与内容理解相关产品,通过AI技术优化用户内容消费体验。',
+    tags: ['推荐系统', '内容产品'],
+    materials: [],
+    timeline: [],
+    nextAction: '待投递',
+    nextActionDate: '2026-04-24',
+  },
+  {
+    id: 'j12', company: '百度Apollo', role: 'IDG产品经理 - 智能驾驶', department: '智能驾驶事业群',
+    city: '北京', salary: '22-32K · 14薪', salaryMin: 22, salaryMax: 32,
+    status: 'closed', priority: 'medium', track: 'mobility',
+    source: '校招官网', deadline: '2026-04-15', appliedAt: '2026-04-05',
+    jd: '负责智能驾驶产品规划,覆盖高速NOA、城市NOA等核心场景。',
+    tags: ['智能驾驶', 'NOA'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-05' },
+    ],
+    timeline: [
+      { date: '2026-04-05', event: '投递简历', type: 'apply' },
+      { date: '2026-04-12', event: '简历未通过', type: 'closed' },
+    ],
+    nextAction: '简历未通过',
+    nextActionDate: '2026-04-12',
+  },
+  {
+    id: 'j13', company: '华讯网络', role: '解决方案工程师', department: '解决方案部',
+    city: '深圳', salary: '15-22K · 13薪', salaryMin: 15, salaryMax: 22,
+    status: 'planning', priority: 'low', track: 'ict',
+    source: '校招官网', deadline: '2026-06-01', appliedAt: null,
+    jd: '面向金融、政府等行业客户提供ICT解决方案,包括网络、云、安全一体化方案设计。',
+    tags: ['ICT', '行业方案'],
+    materials: [],
+    timeline: [],
+    nextAction: '待投递',
+    nextActionDate: '2026-04-30',
+  },
+  {
+    id: 'j14', company: '联通数智', role: '政企信息技术岗', department: '数智服务部',
+    city: '杭州', salary: '14-18K · 14薪', salaryMin: 14, salaryMax: 18,
+    status: 'planning', priority: 'low', track: 'soe',
+    source: '联通招聘', deadline: '2026-05-15', appliedAt: null,
+    jd: '负责政企客户信息化项目的需求对接、方案设计、交付实施。央企稳定编制,不考行测。',
+    tags: ['政企', '稳定编制'],
+    materials: [],
+    timeline: [],
+    nextAction: '待投递 - 用国企版简历',
+    nextActionDate: '2026-04-28',
+  },
+  {
+    id: 'j15', company: 'MINIMAX (备选)', role: 'AI产品运营', department: '市场部',
+    city: '上海', salary: '18-28K · 14薪', salaryMin: 18, salaryMax: 28,
+    status: 'applied', priority: 'medium', track: 'ai',
+    source: '官网', deadline: '2026-07-31', appliedAt: '2026-04-14',
+    jd: '负责MiniMax产品矩阵的运营推广,制定增长策略、内容策略、用户运营方案。',
+    tags: ['运营', 'C端'],
+    materials: [
+      { name: '科技公司版简历.pdf', status: 'submitted', date: '2026-04-14' },
+    ],
+    timeline: [
+      { date: '2026-04-14', event: '投递简历', type: 'apply' },
+    ],
+    nextAction: '等待简历筛选',
+    nextActionDate: '2026-04-28',
+  },
+];
+
+// ========================================
+// STORAGE
+// ========================================
+const STORAGE_KEYS = {
+  JOBS: 'jobtrack_jobs_v1',
+  API_KEY: 'jobtrack_gemini_key_v1',
+  GLM_API_KEY: 'jobtrack_glm_key_v1',
+  PROVIDER: 'jobtrack_provider_v1',
+  RESUME: 'jobtrack_resume_v1',
+  ONBOARDED: 'jobtrack_onboarded_v1',
+};
+
+const storage = {
+  get(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch { return fallback; }
+  },
+  set(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+  },
+};
+
+// ========================================
+// AI PROVIDERS · 双引擎架构
+// ========================================
+const AI_PROVIDERS = {
+  glm: {
+    id: 'glm',
+    name: 'GLM-4-Flash',
+    vendor: '智谱 AI',
+    badge: '国内稳定',
+    badgeColor: '#10b981',
+    icon: '🇨🇳',
+    hint: '智谱 GLM-4-Flash · 免费 · 国内直连',
+  },
+  gemini: {
+    id: 'gemini',
+    name: 'Gemini 2.5 Flash',
+    vendor: 'Google',
+    badge: '需网络环境',
+    badgeColor: '#f59e0b',
+    icon: '🌐',
+    hint: 'Google Gemini · 需代理访问',
+  },
+};
+
+async function callGLM(apiKey, prompt, systemInstruction = null) {
+  if (!apiKey) throw new Error('请先在设置中配置 GLM API Key');
+  const url = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+  const messages = [];
+  if (systemInstruction) {
+    messages.push({ role: 'system', content: systemInstruction });
+  }
+  messages.push({ role: 'user', content: prompt });
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'glm-4-flash',
+      messages,
+      temperature: 0.6,
+      max_tokens: 2048,
+    }),
+  });
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`GLM API 错误 (${resp.status}): ${errText.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error('GLM 返回为空,可能触发了安全过滤');
+  return text;
+}
+
+async function callGemini(apiKey, prompt, systemInstruction = null) {
+  if (!apiKey) throw new Error('请先在设置中配置 Gemini API Key');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
+  const body = {
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.6,
+      maxOutputTokens: 2048,
+    },
+  };
+  if (systemInstruction) {
+    body.systemInstruction = { parts: [{ text: systemInstruction }] };
+  }
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`Gemini API 错误 (${resp.status}): ${errText.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Gemini 返回为空,可能触发了安全过滤');
+  return text;
+}
+
+// Unified dispatcher
+async function callAI(provider, apiKey, prompt, systemInstruction = null) {
+  if (provider === 'gemini') {
+    return callGemini(apiKey, prompt, systemInstruction);
+  }
+  // Default to GLM
+  return callGLM(apiKey, prompt, systemInstruction);
+}
+
+// ========================================
+// UTILS
+// ========================================
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr); target.setHours(0,0,0,0);
+  return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+}
+
+function formatDate(dateStr, short = false) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (short) return `${d.getMonth()+1}.${d.getDate()}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function urgencyLabel(days) {
+  if (days === null) return null;
+  if (days < 0) return { label: '已过期', color: '#94a3b8' };
+  if (days === 0) return { label: '今日截止', color: '#f43f5e', pulse: true };
+  if (days <= 3) return { label: `${days}天后截止`, color: '#f43f5e', pulse: true };
+  if (days <= 7) return { label: `${days}天后截止`, color: '#f59e0b' };
+  if (days <= 14) return { label: `${days}天后截止`, color: '#64748b' };
+  return { label: `${days}天后截止`, color: '#94a3b8' };
+}
+
+function genId() {
+  return 'j' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+}
+
+// ========================================
+// COMPONENTS
+// ========================================
+
+function Badge({ children, color, bg, size = 'sm' }) {
+  const sizes = {
+    xs: 'text-[10px] px-1.5 py-0.5',
+    sm: 'text-xs px-2 py-0.5',
+    md: 'text-sm px-2.5 py-1',
+  };
+  return (
+    <span
+      className={`inline-flex items-center font-medium rounded-full ${sizes[size]} tracking-wide`}
+      style={{ color: color, background: bg || `${color}15` }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function LoadingDots() {
+  return (
+    <span className="inline-flex gap-1">
+      <span className="loading-dot w-1.5 h-1.5 bg-accent-orange rounded-full"></span>
+      <span className="loading-dot w-1.5 h-1.5 bg-accent-orange rounded-full"></span>
+      <span className="loading-dot w-1.5 h-1.5 bg-accent-orange rounded-full"></span>
+    </span>
+  );
+}
+
+function Modal({ open, onClose, children, size = 'md', title, subtitle }) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+  const widths = { sm: 'max-w-md', md: 'max-w-2xl', lg: 'max-w-4xl', xl: 'max-w-6xl' };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="min-h-screen flex items-start justify-center p-4 md:p-8">
+        <div className="fixed inset-0 bg-ink-900/30 backdrop-blur-sm fade-in-up"></div>
+        <div
+          className={`relative bg-ink-50 w-full ${widths[size]} rounded-sm shadow-2xl fade-in-up border border-ink-200`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {(title || subtitle) && (
+            <div className="border-b border-ink-200 px-6 py-5 flex items-start justify-between">
+              <div>
+                {subtitle && <div className="text-[10px] uppercase tracking-[0.2em] text-accent-orange mb-1 font-mono">{subtitle}</div>}
+                {title && <h2 className="font-display text-2xl font-light text-ink-900">{title}</h2>}
+              </div>
+              <button
+                onClick={onClose}
+                className="text-ink-400 hover:text-ink-900 transition-colors text-2xl leading-none"
+              >×</button>
+            </div>
+          )}
+          <div className="p-6">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----- HEADER -----
+function Header({ view, onViewChange, onAdd, onSettings, onOpenAIHub, onOpenEmail, stats }) {
+  const views = [
+    { id: 'kanban', label: '看板', icon: '⌘' },
+    { id: 'calendar', label: '日历', icon: '◫' },
+    { id: 'analytics', label: '分析', icon: '◐' },
+  ];
+
+  return (
+    <header className="border-b border-ink-200 bg-white sticky top-0 z-30 backdrop-blur-md bg-white/90">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-accent-sky flex items-center justify-center rounded-lg shadow-lg shadow-brand-500/25">
+              <span className="font-display text-white text-xl italic font-semibold">J</span>
+            </div>
+            <div>
+              <div className="font-display text-xl font-light tracking-tight leading-none">
+                JobTrack <span className="italic text-brand-500 font-medium">AI</span>
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mt-0.5">
+                Campus Recruitment, Mastered.
+              </div>
+            </div>
+          </div>
+
+          {/* View Switcher */}
+          <nav className="flex items-center gap-1 bg-ink-100 p-1 rounded-lg">
+            {views.map(v => (
+              <button
+                key={v.id}
+                onClick={() => onViewChange(v.id)}
+                className={`px-4 py-1.5 text-sm font-medium tracking-wide transition-all rounded-md ${
+                  view === v.id
+                    ? 'bg-white text-ink-900 shadow-sm'
+                    : 'text-ink-600 hover:text-ink-900'
+                }`}
+              >
+                <span className="mr-1.5 font-mono">{v.icon}</span>
+                {v.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            {stats && (
+              <div className="hidden md:flex items-center gap-3 text-xs text-ink-500 font-mono mr-2">
+                <span><span className="text-ink-900 font-semibold">{stats.total}</span> 岗位</span>
+                <span className="text-ink-300">·</span>
+                <span className="text-accent-coral">{stats.urgent} 紧急</span>
+              </div>
+            )}
+
+            {/* Email Inbox entry */}
+            <button
+              onClick={onOpenEmail}
+              className="relative px-3 py-2 text-sm font-medium text-ink-700 bg-white border border-ink-200 hover:border-ink-400 hover:bg-ink-50 rounded-lg transition-colors group"
+              title="连接邮箱 (Beta)"
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="text-base">📬</span>
+                <span className="hidden lg:inline">邮箱</span>
+              </span>
+              <span className="absolute -top-1.5 -right-1.5 text-[9px] font-mono font-semibold px-1.5 py-0.5 bg-accent-coral text-white rounded-full uppercase tracking-wider">
+                Beta
+              </span>
+            </button>
+
+            {/* AI Hub entry - SHIMMER BUTTON */}
+            <button
+              onClick={onOpenAIHub}
+              className="relative px-3 py-2 text-sm font-semibold text-white rounded-lg overflow-hidden group ai-gradient-btn shadow-lg shadow-brand-500/25"
+              title="AI 功能中心"
+            >
+              <span className="relative z-10 flex items-center gap-1.5">
+                <span className="sparkle-icon">✦</span>
+                <span className="hidden sm:inline">AI 助手</span>
+              </span>
+            </button>
+            <button
+              onClick={onAdd}
+              className="px-4 py-2 bg-ink-900 text-white text-sm font-medium hover:bg-ink-700 transition-colors rounded-lg"
+            >
+              + 新增
+            </button>
+            <button
+              onClick={onSettings}
+              className="w-9 h-9 flex items-center justify-center text-ink-500 hover:text-ink-900 hover:bg-ink-100 transition-all rounded-lg"
+              title="设置"
+            >⚙</button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ----- KANBAN VIEW -----
+function KanbanView({ jobs, onCardClick, onStatusChange, onAIQuickClick }) {
+  const [draggedId, setDraggedId] = useState(null);
+  const [dragOverCol, setDragOverCol] = useState(null);
+  const [filterTrack, setFilterTrack] = useState(null);
+  const [filterUrgentOnly, setFilterUrgentOnly] = useState(false);
+
+  // Filter jobs by track + urgency
+  const filteredJobs = useMemo(() => {
+    return jobs.filter(j => {
+      if (filterTrack && j.track !== filterTrack) return false;
+      if (filterUrgentOnly) {
+        if (j.status === 'offer' || j.status === 'closed') return false;
+        const d = daysUntil(j.deadline);
+        if (d === null || d < 0 || d > 7) return false;
+      }
+      return true;
+    });
+  }, [jobs, filterTrack, filterUrgentOnly]);
+
+  // Count per track (based on total jobs, not filtered)
+  const trackCounts = useMemo(() => {
+    const counts = { _all: jobs.length };
+    Object.keys(TRACKS).forEach(k => { counts[k] = 0; });
+    jobs.forEach(j => { if (counts[j.track] !== undefined) counts[j.track]++; });
+    return counts;
+  }, [jobs]);
+
+  const groupedJobs = useMemo(() => {
+    const groups = {};
+    STATUSES.forEach(s => { groups[s.id] = []; });
+    filteredJobs.forEach(j => {
+      if (groups[j.status]) groups[j.status].push(j);
+    });
+    // Sort by priority + deadline urgency
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    Object.keys(groups).forEach(k => {
+      groups[k].sort((a, b) => {
+        const pDiff = (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+        if (pDiff !== 0) return pDiff;
+        const da = daysUntil(a.deadline) ?? 999;
+        const db = daysUntil(b.deadline) ?? 999;
+        return da - db;
+      });
+    });
+    return groups;
+  }, [filteredJobs]);
+
+  const handleDragStart = (e, jobId) => {
+    setDraggedId(jobId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, statusId) => {
+    e.preventDefault();
+    setDragOverCol(statusId);
+  };
+
+  const handleDrop = (e, statusId) => {
+    e.preventDefault();
+    if (draggedId) {
+      onStatusChange(draggedId, statusId);
+    }
+    setDraggedId(null);
+    setDragOverCol(null);
+  };
+
+  const hasFilter = filterTrack || filterUrgentOnly;
+  const clearFilters = () => { setFilterTrack(null); setFilterUrgentOnly(false); };
+
+  return (
+    <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-6">
+      <div className="mb-4">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-brand-500 font-mono mb-1 font-semibold">01 — Pipeline Overview</div>
+        <h1 className="font-display text-3xl md:text-4xl font-light text-ink-900">
+          投递看板 <span className="italic text-ink-400">/ The Board</span>
+        </h1>
+        <p className="text-sm text-ink-500 mt-1">拖拽卡片改变状态 · 点击查看详情 · 悬浮显示 AI 分析按钮</p>
+      </div>
+
+      {/* Filter bar */}
+      <div className="mb-5 flex items-center gap-2 flex-wrap">
+        <span className="text-xs text-ink-500 font-mono uppercase tracking-wider mr-1">筛选:</span>
+
+        {/* Track filter chips */}
+        <FilterChip
+          active={filterTrack === null}
+          onClick={() => setFilterTrack(null)}
+          count={trackCounts._all}
+        >全部赛道</FilterChip>
+        {Object.entries(TRACKS).map(([id, track]) => (
+          <FilterChip
+            key={id}
+            active={filterTrack === id}
+            onClick={() => setFilterTrack(id)}
+            color={track.color}
+            count={trackCounts[id]}
+          >{track.label}</FilterChip>
+        ))}
+
+        <div className="w-px h-5 bg-ink-200 mx-1"></div>
+
+        {/* Urgency toggle */}
+        <FilterChip
+          active={filterUrgentOnly}
+          onClick={() => setFilterUrgentOnly(!filterUrgentOnly)}
+          color="#f43f5e"
+        >⏱ 仅紧急(7天内)</FilterChip>
+
+        {hasFilter && (
+          <button
+            onClick={clearFilters}
+            className="ml-2 text-xs text-ink-500 hover:text-ink-900 underline underline-offset-2"
+          >清除筛选</button>
+        )}
+
+        <span className="ml-auto text-xs text-ink-500 font-mono">
+          显示 <span className="text-ink-900 font-semibold">{filteredJobs.length}</span>
+          {hasFilter && <span> / {jobs.length}</span>} 个岗位
+        </span>
+      </div>
+
+      <div className="overflow-x-auto pb-4 -mx-4 px-4 md:-mx-8 md:px-8">
+        <div className="flex gap-4 min-w-max">
+          {STATUSES.map(status => {
+            const items = groupedJobs[status.id] || [];
+            const isDragOver = dragOverCol === status.id;
+            return (
+              <div
+                key={status.id}
+                className={`w-[280px] shrink-0 border-2 border-dashed rounded-xl transition-all ${
+                  isDragOver ? 'drag-over' : 'border-transparent'
+                }`}
+                onDragOver={(e) => handleDragOver(e, status.id)}
+                onDragLeave={() => setDragOverCol(null)}
+                onDrop={(e) => handleDrop(e, status.id)}
+              >
+                <div className="mb-3 px-1 pt-1 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: status.color }}
+                    ></span>
+                    <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: status.color }}>
+                      {status.label}
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono text-ink-400 bg-ink-100 px-1.5 py-0.5 rounded-md">{items.length}</span>
+                </div>
+
+                <div className="space-y-2.5 min-h-[60vh]">
+                  {items.map((job, idx) => (
+                    <KanbanCard
+                      key={job.id}
+                      job={job}
+                      onClick={() => onCardClick(job)}
+                      onAIClick={onAIQuickClick}
+                      onDragStart={(e) => handleDragStart(e, job.id)}
+                      style={{ animationDelay: `${idx * 30}ms` }}
+                    />
+                  ))}
+                  {items.length === 0 && (
+                    <div className="border border-dashed border-ink-200 rounded-xl p-4 text-center text-xs text-ink-400">
+                      暂无岗位
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FilterChip({ active, onClick, children, color, count }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-xs px-3 py-1.5 rounded-full transition-all font-medium border ${
+        active
+          ? 'bg-ink-900 text-white border-ink-900 shadow-sm'
+          : 'bg-white text-ink-600 border-ink-200 hover:border-ink-400 hover:text-ink-900'
+      }`}
+      style={active && color ? { background: color, borderColor: color } : {}}
+    >
+      {children}
+      {count !== undefined && count > 0 && (
+        <span className={`ml-1.5 font-mono ${active ? 'opacity-70' : 'opacity-50'}`}>{count}</span>
+      )}
+    </button>
+  );
+}
+
+function KanbanCard({ job, onClick, onAIClick, onDragStart, style }) {
+  const days = daysUntil(job.deadline);
+  const urgency = urgencyLabel(days);
+  const track = TRACKS[job.track] || TRACKS.ai;
+
+  return (
+    <div
+      draggable
+      onDragStart={onDragStart}
+      onClick={onClick}
+      className="kanban-card bg-white border border-ink-200 p-3 cursor-pointer fade-in-up rounded-xl relative overflow-hidden group"
+      style={style}
+    >
+      {/* Track indicator (side bar) */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1"
+        style={{ background: track.color }}
+      ></div>
+
+      {/* AI quick-action button (visible on hover) */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onAIClick && onAIClick(job); }}
+        className="ai-quick-btn absolute top-2 right-2 w-7 h-7 rounded-full ai-gradient-btn flex items-center justify-center text-white text-xs opacity-0 scale-90 transition-all shadow-md z-10"
+        title="AI 分析此岗位"
+      >
+        <span className="sparkle-icon">✦</span>
+      </button>
+
+      <div className="pl-2">
+        {/* Company + Role */}
+        <div className="flex items-start justify-between gap-2 mb-1.5 pr-7">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-mono tracking-wider text-ink-500 uppercase mb-0.5">
+              {job.company}
+            </div>
+            <div className="text-sm font-semibold text-ink-900 leading-snug line-clamp-2">
+              {job.role}
+            </div>
+          </div>
+          {job.priority === 'high' && (
+            <div
+              className="w-2 h-2 bg-accent-coral rounded-full mt-1.5 shrink-0"
+              style={urgency?.pulse ? { boxShadow: '0 0 0 4px rgba(244,63,94,0.2)' } : {}}
+            ></div>
+          )}
+        </div>
+
+        {/* Meta */}
+        <div className="flex items-center gap-2 text-[11px] text-ink-500 mb-2">
+          <span>{job.city}</span>
+          <span className="text-ink-300">·</span>
+          <span className="font-mono">{job.salary.split(' · ')[0]}</span>
+        </div>
+
+        {/* Tags */}
+        {job.tags && job.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {job.tags.slice(0, 2).map(t => (
+              <span key={t} className="text-[9px] uppercase tracking-wide text-ink-600 bg-ink-100 px-1.5 py-0.5 rounded-md">
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Deadline + Next Action */}
+        <div className="pt-2 border-t border-ink-100 space-y-1">
+          {urgency && job.status !== 'offer' && job.status !== 'closed' && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono font-semibold" style={{ color: urgency.color }}>
+                ⏱ {urgency.label}
+              </span>
+            </div>
+          )}
+          {job.nextAction && (
+            <div className="text-[10px] text-ink-600 line-clamp-1">
+              → {job.nextAction}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----- CALENDAR VIEW -----
+function CalendarView({ jobs, onCardClick }) {
+  const [cursor, setCursor] = useState(() => {
+    const d = new Date();
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
+
+  const events = useMemo(() => {
+    const evts = {};
+    const pushEvent = (dateStr, evt) => {
+      if (!dateStr) return;
+      const key = dateStr.slice(0, 10);
+      if (!evts[key]) evts[key] = [];
+      evts[key].push(evt);
+    };
+    jobs.forEach(job => {
+      if (job.deadline) {
+        pushEvent(job.deadline, { type: 'deadline', job, label: `${job.company} 截止` });
+      }
+      (job.timeline || []).forEach(t => {
+        if (t.type === 'upcoming' || t.type === 'interview' || t.type === 'test') {
+          if (t.date >= new Date().toISOString().slice(0,10)) {
+            pushEvent(t.date, { type: t.type, job, label: `${job.company} ${t.event}` });
+          }
+        }
+      });
+    });
+    return evts;
+  }, [jobs]);
+
+  const { year, month } = cursor;
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startPad = firstDay.getDay();
+  const totalDays = lastDay.getDate();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const cells = [];
+  for (let i = 0; i < startPad; i++) cells.push(null);
+  for (let d = 1; d <= totalDays; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells.push({ date: d, dateStr, events: events[dateStr] || [] });
+  }
+
+  const monthLabel = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'][month];
+
+  const prevMonth = () => setCursor(c => c.month === 0 ? { year: c.year-1, month: 11 } : { ...c, month: c.month-1 });
+  const nextMonth = () => setCursor(c => c.month === 11 ? { year: c.year+1, month: 0 } : { ...c, month: c.month+1 });
+  const goToday = () => { const d = new Date(); setCursor({ year: d.getFullYear(), month: d.getMonth() }); };
+
+  // Upcoming events list
+  const upcomingEvents = useMemo(() => {
+    const list = [];
+    Object.keys(events).sort().forEach(dateStr => {
+      if (dateStr >= today) {
+        events[dateStr].forEach(e => list.push({ ...e, date: dateStr }));
+      }
+    });
+    return list.slice(0, 10);
+  }, [events, today]);
+
+  return (
+    <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-6">
+      <div className="mb-6 flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.25em] text-accent-orange font-mono mb-1">02 — Timeline</div>
+          <h1 className="font-display text-3xl md:text-4xl font-light text-ink-900">
+            日历视图 <span className="italic text-ink-400">/ Calendar</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={prevMonth} className="w-9 h-9 flex items-center justify-center hover:bg-ink-100 rounded-sm text-ink-600">‹</button>
+          <div className="font-display text-xl px-3 min-w-[140px] text-center">
+            <span className="font-mono text-sm text-ink-500">{year}</span>
+            <span className="mx-2 italic">{monthLabel}</span>
+          </div>
+          <button onClick={nextMonth} className="w-9 h-9 flex items-center justify-center hover:bg-ink-100 rounded-sm text-ink-600">›</button>
+          <button onClick={goToday} className="ml-2 px-3 py-1.5 text-xs border border-ink-300 hover:bg-ink-100 rounded-sm">今天</button>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-[1fr_320px] gap-6">
+        {/* Calendar */}
+        <div className="bg-ink-50 border border-ink-200 rounded-sm overflow-hidden">
+          <div className="grid grid-cols-7 border-b border-ink-200">
+            {['日','一','二','三','四','五','六'].map(d => (
+              <div key={d} className="py-3 text-center text-xs font-semibold uppercase tracking-wider text-ink-500">
+                {d}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {cells.map((cell, i) => {
+              if (!cell) return <div key={i} className="h-24 md:h-28 border-t border-r border-ink-100 bg-ink-100/30"></div>;
+              const isToday = cell.dateStr === today;
+              return (
+                <div
+                  key={i}
+                  className={`h-24 md:h-28 border-t border-r border-ink-100 p-1.5 overflow-hidden ${
+                    isToday ? 'bg-accent-orange/5' : ''
+                  }`}
+                >
+                  <div className={`text-xs font-mono mb-1 ${
+                    isToday ? 'text-accent-orange font-bold' : 'text-ink-600'
+                  }`}>
+                    {isToday && <span className="inline-block w-1.5 h-1.5 bg-accent-orange rounded-full mr-1 align-middle"></span>}
+                    {cell.date}
+                  </div>
+                  <div className="space-y-0.5">
+                    {cell.events.slice(0, 3).map((e, idx) => {
+                      const color = e.type === 'deadline' ? '#d9562b' :
+                                    e.type === 'interview' || e.type === 'upcoming' ? '#6b3e4e' :
+                                    '#918878';
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => onCardClick(e.job)}
+                          className="w-full text-left text-[10px] px-1 py-0.5 rounded-sm truncate hover:opacity-80"
+                          style={{ background: `${color}15`, color: color }}
+                          title={e.label}
+                        >
+                          {e.label}
+                        </button>
+                      );
+                    })}
+                    {cell.events.length > 3 && (
+                      <div className="text-[9px] text-ink-400 pl-1">+{cell.events.length - 3} 更多</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Upcoming */}
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-3">
+            Upcoming / 待办日程
+          </div>
+          <div className="space-y-2">
+            {upcomingEvents.length === 0 && (
+              <div className="text-sm text-ink-400 p-4 border border-dashed border-ink-200 rounded-sm">
+                近期没有待办
+              </div>
+            )}
+            {upcomingEvents.map((e, i) => {
+              const days = daysUntil(e.date);
+              const color = e.type === 'deadline' ? '#d9562b' :
+                            e.type === 'interview' || e.type === 'upcoming' ? '#6b3e4e' :
+                            '#918878';
+              return (
+                <button
+                  key={i}
+                  onClick={() => onCardClick(e.job)}
+                  className="w-full text-left bg-ink-50 border border-ink-200 p-3 hover:border-ink-400 transition-colors rounded-sm block"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <span className="text-[10px] uppercase font-mono tracking-wider" style={{ color }}>
+                      {e.type === 'deadline' ? '截止' : e.type === 'interview' ? '面试' : e.type === 'test' ? '笔试' : '待办'}
+                    </span>
+                    <span className="text-[10px] font-mono text-ink-500">
+                      {days === 0 ? '今天' : days === 1 ? '明天' : `${days}天`}
+                    </span>
+                  </div>
+                  <div className="text-sm font-medium text-ink-900 leading-snug">{e.label}</div>
+                  <div className="text-[10px] text-ink-500 mt-1 font-mono">{formatDate(e.date)}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ----- ANALYTICS VIEW -----
+function AnalyticsView({ jobs }) {
+  const stats = useMemo(() => {
+    const total = jobs.length;
+    const byStatus = {};
+    STATUSES.forEach(s => { byStatus[s.id] = 0; });
+    jobs.forEach(j => { byStatus[j.status] = (byStatus[j.status] || 0) + 1; });
+
+    const applied = total - (byStatus.planning || 0);
+    const passed = applied - (byStatus.applied || 0);
+    const interview = (byStatus.interview || 0) + (byStatus.offer || 0);
+    const offer = byStatus.offer || 0;
+
+    // By track
+    const byTrack = {};
+    Object.keys(TRACKS).forEach(k => { byTrack[k] = 0; });
+    jobs.forEach(j => { byTrack[j.track] = (byTrack[j.track] || 0) + 1; });
+
+    // By city
+    const byCity = {};
+    jobs.forEach(j => { byCity[j.city] = (byCity[j.city] || 0) + 1; });
+
+    // Salary distribution (of offered/interviewed)
+    const salaries = jobs
+      .filter(j => j.status !== 'planning')
+      .map(j => (j.salaryMin + j.salaryMax) / 2);
+    const avgSalary = salaries.length ? (salaries.reduce((a,b) => a+b, 0) / salaries.length) : 0;
+
+    return { total, byStatus, applied, passed, interview, offer, byTrack, byCity, avgSalary };
+  }, [jobs]);
+
+  const funnelData = [
+    { name: '已投递', value: stats.applied, fill: '#4a4439' },
+    { name: '通过初筛', value: stats.passed, fill: '#6b3e4e' },
+    { name: '进入面试', value: stats.interview, fill: '#d9562b' },
+    { name: 'Offer', value: stats.offer, fill: '#5a6b4a' },
+  ];
+
+  const trackData = Object.entries(stats.byTrack).map(([k, v]) => ({
+    name: TRACKS[k].label,
+    value: v,
+    color: TRACKS[k].color,
+  }));
+
+  const cityData = Object.entries(stats.byCity).map(([city, count]) => ({
+    city, count,
+  })).sort((a,b) => b.count - a.count);
+
+  const statusData = STATUSES.map(s => ({
+    name: s.label,
+    count: stats.byStatus[s.id] || 0,
+    color: s.color,
+  }));
+
+  return (
+    <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-6">
+      <div className="mb-6">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-accent-orange font-mono mb-1">03 — Insights</div>
+        <h1 className="font-display text-3xl md:text-4xl font-light text-ink-900">
+          数据洞察 <span className="italic text-ink-400">/ Analytics</span>
+        </h1>
+        <p className="text-sm text-ink-500 mt-1">量化你的求职进度,用数据驱动决策</p>
+      </div>
+
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <KPICard label="目标岗位总数" value={stats.total} suffix="个" highlight />
+        <KPICard label="已投递" value={stats.applied} suffix={`/${stats.total}`} />
+        <KPICard label="进入面试" value={stats.interview} suffix="个" />
+        <KPICard label="期望月薪均值" value={Math.round(stats.avgSalary)} suffix="K" highlight />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Funnel */}
+        <ChartCard title="投递漏斗" subtitle="Pipeline Conversion">
+          <div className="space-y-3 pt-2">
+            {funnelData.map((d, i) => {
+              const maxVal = Math.max(...funnelData.map(f => f.value));
+              const pct = maxVal > 0 ? (d.value / maxVal) * 100 : 0;
+              const prevVal = i > 0 ? funnelData[i-1].value : null;
+              const conversionRate = prevVal && prevVal > 0 ? Math.round((d.value / prevVal) * 100) : null;
+              return (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs uppercase tracking-wider text-ink-600">{d.name}</span>
+                      {conversionRate !== null && (
+                        <span className="text-[10px] font-mono text-ink-400">↓ {conversionRate}%</span>
+                      )}
+                    </div>
+                    <span className="font-mono text-lg font-semibold" style={{ color: d.fill }}>{d.value}</span>
+                  </div>
+                  <div className="h-8 bg-ink-100 rounded-sm overflow-hidden">
+                    <div
+                      className="h-full transition-all duration-1000 rounded-sm"
+                      style={{ width: `${pct}%`, background: d.fill }}
+                    ></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </ChartCard>
+
+        {/* Track Distribution */}
+        <ChartCard title="赛道分布" subtitle="By Job Track">
+          <div className="flex items-center justify-center py-2" style={{ height: 220 }}>
+            <DonutChart data={trackData} size={180} />
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {trackData.map(t => (
+              <div key={t.name} className="flex items-center gap-2 text-xs">
+                <span className="w-2 h-2" style={{ background: t.color }}></span>
+                <span className="text-ink-600">{t.name}</span>
+                <span className="ml-auto font-mono text-ink-900">{t.value}</span>
+              </div>
+            ))}
+          </div>
+        </ChartCard>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* City Distribution */}
+        <ChartCard title="城市分布" subtitle="Target Cities">
+          <div style={{ minHeight: 240 }} className="py-2">
+            <HorizontalBarChart data={cityData} />
+          </div>
+        </ChartCard>
+
+        {/* Status Distribution */}
+        <ChartCard title="状态分布" subtitle="Current Status">
+          <div style={{ minHeight: 240 }} className="py-2">
+            <VerticalBarChart data={statusData} />
+          </div>
+        </ChartCard>
+      </div>
+
+      {/* AI Insights */}
+      <div className="mt-6 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-900 text-white p-6 rounded-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-sky/15 rounded-full blur-3xl"></div>
+        <div className="relative">
+          <div className="text-[11px] uppercase tracking-[0.25em] text-brand-400 font-mono mb-2 font-semibold">
+            ✦ AI Insight
+          </div>
+          <h3 className="font-display text-2xl mb-4">求职策略建议</h3>
+          <div className="space-y-2.5 text-sm text-ink-200 leading-relaxed">
+            {stats.applied < stats.total * 0.5 && (
+              <div className="flex items-start gap-2">
+                <span className="text-brand-400 font-bold">▸</span>
+                <span>投递率仅 <span className="font-mono text-white font-semibold">{Math.round(stats.applied/stats.total*100)}%</span>,建议本周内完成剩余 <span className="font-mono text-white font-semibold">{stats.total - stats.applied}</span> 个岗位的投递</span>
+              </div>
+            )}
+            {stats.offer > 0 && (
+              <div className="flex items-start gap-2">
+                <span className="text-brand-400 font-bold">▸</span>
+                <span>已有 <span className="font-mono text-white font-semibold">{stats.offer}</span> 个 Offer,建议把握决策时间窗口,评估待定岗位进度</span>
+              </div>
+            )}
+            {stats.interview > 2 && (
+              <div className="flex items-start gap-2">
+                <span className="text-brand-400 font-bold">▸</span>
+                <span>面试密集期,建议提前准备高频面试题,复用面试回答框架提升效率</span>
+              </div>
+            )}
+            <div className="flex items-start gap-2">
+              <span className="text-brand-400 font-bold">▸</span>
+              <span>当前赛道集中在 <span className="text-white font-semibold">{trackData.sort((a,b) => b.value-a.value)[0]?.name}</span>,建议适度分散风险,避免赛道过度集中</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KPICard({ label, value, suffix, highlight }) {
+  return (
+    <div className={`p-5 rounded-2xl ${highlight ? 'bg-gradient-to-br from-ink-900 to-ink-800 text-white' : 'bg-white border border-ink-200'}`}>
+      <div className={`text-[10px] uppercase tracking-[0.2em] font-mono mb-2 font-semibold ${highlight ? 'text-brand-400' : 'text-ink-500'}`}>
+        {label}
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span className="font-display text-4xl font-light">{value}</span>
+        {suffix && <span className={`text-sm font-mono ${highlight ? 'text-ink-300' : 'text-ink-500'}`}>{suffix}</span>}
+      </div>
+    </div>
+  );
+}
+
+function ChartCard({ title, subtitle, children }) {
+  return (
+    <div className="bg-white border border-ink-200 p-5 rounded-2xl">
+      <div className="mb-4">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-brand-500 font-mono mb-1 font-semibold">{subtitle}</div>
+        <h3 className="font-display text-xl font-light">{title}</h3>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ----- Pure SVG Donut Chart -----
+function DonutChart({ data, size = 180 }) {
+  const total = data.reduce((sum, d) => sum + (d.value || 0), 0);
+  if (total === 0) {
+    return (
+      <div className="text-sm text-ink-400 italic">暂无数据</div>
+    );
+  }
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size * 0.42;
+  const innerR = size * 0.27;
+  const gap = 0.01; // small gap between segments
+
+  let startAngle = -Math.PI / 2;
+  const segments = data.filter(d => d.value > 0).map(d => {
+    const angle = (d.value / total) * Math.PI * 2 - gap;
+    const endAngle = startAngle + angle;
+
+    const x1 = cx + Math.cos(startAngle) * r;
+    const y1 = cy + Math.sin(startAngle) * r;
+    const x2 = cx + Math.cos(endAngle) * r;
+    const y2 = cy + Math.sin(endAngle) * r;
+
+    const ix1 = cx + Math.cos(endAngle) * innerR;
+    const iy1 = cy + Math.sin(endAngle) * innerR;
+    const ix2 = cx + Math.cos(startAngle) * innerR;
+    const iy2 = cy + Math.sin(startAngle) * innerR;
+
+    const largeArc = angle > Math.PI ? 1 : 0;
+    const path = `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} L ${ix1.toFixed(2)} ${iy1.toFixed(2)} A ${innerR} ${innerR} 0 ${largeArc} 0 ${ix2.toFixed(2)} ${iy2.toFixed(2)} Z`;
+
+    const seg = { ...d, path };
+    startAngle = endAngle + gap;
+    return seg;
+  });
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {segments.map((s, i) => (
+        <path key={i} d={s.path} fill={s.color} stroke="#f7f6f2" strokeWidth="2">
+          <title>{s.name}: {s.value}</title>
+        </path>
+      ))}
+      <text
+        x={cx} y={cy - 6}
+        textAnchor="middle"
+        className="font-mono"
+        style={{ fontSize: '22px', fill: '#1a1815', fontWeight: 300 }}
+      >{total}</text>
+      <text
+        x={cx} y={cy + 12}
+        textAnchor="middle"
+        style={{ fontSize: '10px', fill: '#918878', letterSpacing: '0.1em' }}
+      >TOTAL</text>
+    </svg>
+  );
+}
+
+// ----- Horizontal Bar Chart -----
+function HorizontalBarChart({ data, color = '#d9562b' }) {
+  const max = Math.max(1, ...data.map(d => d.count));
+  return (
+    <div className="space-y-2.5">
+      {data.map(d => {
+        const pct = (d.count / max) * 100;
+        return (
+          <div key={d.city} className="flex items-center gap-3">
+            <div className="w-16 text-xs text-ink-600 shrink-0 text-right">{d.city}</div>
+            <div className="flex-1 h-6 bg-ink-100 rounded-sm overflow-hidden relative">
+              <div
+                className="h-full rounded-sm transition-all duration-700 ease-out"
+                style={{ width: `${pct}%`, background: color }}
+              ></div>
+            </div>
+            <div className="w-6 text-xs font-mono text-ink-900 text-right">{d.count}</div>
+          </div>
+        );
+      })}
+      {data.length === 0 && <div className="text-sm text-ink-400 italic">暂无数据</div>}
+    </div>
+  );
+}
+
+// ----- Vertical Bar Chart -----
+function VerticalBarChart({ data }) {
+  const max = Math.max(1, ...data.map(d => d.count));
+  return (
+    <div className="flex items-end gap-2 pt-4" style={{ minHeight: 200 }}>
+      {data.map(d => {
+        const pct = (d.count / max) * 100;
+        return (
+          <div key={d.name} className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+            <div className="text-[10px] font-mono text-ink-600 h-4">{d.count > 0 ? d.count : ''}</div>
+            <div className="w-full relative flex items-end" style={{ height: '140px' }}>
+              <div
+                className="w-full rounded-sm transition-all duration-700 ease-out"
+                style={{
+                  height: `${Math.max(pct, d.count > 0 ? 3 : 0)}%`,
+                  background: d.color,
+                  minHeight: d.count > 0 ? '4px' : '0',
+                }}
+              ></div>
+            </div>
+            <div className="text-[10px] text-ink-600 text-center truncate w-full" title={d.name}>{d.name}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+// ----- JOB DETAIL MODAL -----
+function JobDetailModal({ job, open, onClose, onUpdate, onDelete, onOpenAI }) {
+  if (!job) return null;
+  const [edit, setEdit] = useState(false);
+  const [draft, setDraft] = useState(job);
+
+  useEffect(() => { setDraft(job); setEdit(false); }, [job]);
+
+  const days = daysUntil(job.deadline);
+  const urgency = urgencyLabel(days);
+  const track = TRACKS[job.track] || TRACKS.ai;
+  const status = STATUSES.find(s => s.id === job.status);
+
+  const save = () => {
+    onUpdate(draft);
+    setEdit(false);
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} size="lg" subtitle={`Job Detail / ${job.company}`} title={job.role}>
+      <div className="space-y-5">
+        {/* Top meta */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge color={track.color} bg={`${track.color}15`}>{track.label}</Badge>
+          <Badge color={status.color} bg={status.bg}>{status.label}</Badge>
+          <Badge color={PRIORITY[job.priority].color}>{PRIORITY[job.priority].label}</Badge>
+          {urgency && job.status !== 'offer' && job.status !== 'closed' && (
+            <Badge color={urgency.color}>⏱ {urgency.label}</Badge>
+          )}
+        </div>
+
+        {/* Basic info grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-ink-100/50 rounded-sm">
+          <InfoItem label="公司" value={job.company} />
+          <InfoItem label="部门" value={job.department || '-'} />
+          <InfoItem label="城市" value={job.city} />
+          <InfoItem label="薪资" value={job.salary} mono />
+          <InfoItem label="渠道" value={job.source} />
+          <InfoItem label="截止日期" value={formatDate(job.deadline)} mono />
+          <InfoItem label="投递日期" value={job.appliedAt ? formatDate(job.appliedAt) : '未投递'} mono />
+          <InfoItem label="下一步" value={job.nextAction} highlight />
+        </div>
+
+        {/* AI Tools */}
+        <div className="border border-ink-900 rounded-sm p-4 bg-gradient-to-br from-ink-50 to-ink-100/50">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-accent-orange font-mono">AI Copilot</div>
+              <h4 className="font-display text-lg">智能求职助手</h4>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <AIButton icon="◎" label="JD 智能解析" desc="提取核心要求与关键词" onClick={() => onOpenAI('jd', job)} />
+            <AIButton icon="⚖" label="简历匹配度" desc="评估匹配分数与缺口" onClick={() => onOpenAI('match', job)} />
+            <AIButton icon="✦" label="面试题预测" desc="生成高频面试问题" onClick={() => onOpenAI('interview', job)} />
+          </div>
+        </div>
+
+        {/* JD */}
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-2 editorial-rule pl-8">
+            Job Description
+          </div>
+          <div className="text-sm text-ink-700 leading-relaxed whitespace-pre-line p-4 bg-ink-100/30 rounded-sm border border-ink-200">
+            {job.jd}
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-3 editorial-rule pl-8">
+            Timeline
+          </div>
+          {job.timeline && job.timeline.length > 0 ? (
+            <div className="space-y-2">
+              {job.timeline.map((t, i) => (
+                <div key={i} className="flex gap-3 items-start">
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className={`w-3 h-3 rounded-full ${
+                      t.type === 'offer' ? 'bg-accent-sage' :
+                      t.type === 'upcoming' ? 'bg-accent-orange pulse-ring' :
+                      t.type === 'closed' ? 'bg-ink-300' :
+                      'bg-ink-600'
+                    }`}></div>
+                    {i < job.timeline.length - 1 && <div className="w-px flex-1 bg-ink-200 min-h-[20px]"></div>}
+                  </div>
+                  <div className="pb-3">
+                    <div className="text-xs font-mono text-ink-500">{formatDate(t.date)}</div>
+                    <div className="text-sm text-ink-900">{t.event}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-ink-400 italic">暂无时间线记录</div>
+          )}
+        </div>
+
+        {/* Materials */}
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-3 editorial-rule pl-8">
+            Materials
+          </div>
+          {job.materials && job.materials.length > 0 ? (
+            <div className="space-y-1.5">
+              {job.materials.map((m, i) => (
+                <div key={i} className="flex items-center justify-between p-2 bg-ink-100/40 rounded-sm text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-ink-400">📄</span>
+                    <span>{m.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {m.date && <span className="text-xs font-mono text-ink-500">{formatDate(m.date, true)}</span>}
+                    <Badge size="xs" color={m.status === 'submitted' ? '#5a6b4a' : '#918878'}>
+                      {m.status === 'submitted' ? '已提交' : '待提交'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-ink-400 italic">暂无材料记录</div>
+          )}
+        </div>
+
+        {/* Status Change */}
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-2 editorial-rule pl-8">
+            Change Status
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {STATUSES.map(s => (
+              <button
+                key={s.id}
+                onClick={() => onUpdate({ ...job, status: s.id })}
+                className={`px-3 py-1.5 text-xs rounded-sm transition-all ${
+                  job.status === s.id
+                    ? 'text-ink-50'
+                    : 'text-ink-600 border border-ink-200 hover:border-ink-400'
+                }`}
+                style={job.status === s.id ? { background: s.color } : {}}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center pt-4 border-t border-ink-200">
+          <button
+            onClick={() => { if (confirm('确定删除此岗位?')) { onDelete(job.id); onClose(); } }}
+            className="text-sm text-ink-400 hover:text-accent-rust"
+          >删除岗位</button>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-ink-900 text-ink-50 text-sm rounded-sm hover:bg-ink-700"
+          >完成</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function InfoItem({ label, value, mono, highlight }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 mb-1">{label}</div>
+      <div className={`text-sm ${mono ? 'font-mono' : ''} ${highlight ? 'text-accent-orange font-medium' : 'text-ink-900'}`}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function AIButton({ icon, label, desc, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="text-left p-3 bg-ink-50 border border-ink-200 hover:border-accent-orange hover:bg-accent-orange/5 transition-all rounded-sm group"
+    >
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-lg text-accent-orange">{icon}</span>
+        <span className="text-sm font-semibold text-ink-900">{label}</span>
+      </div>
+      <div className="text-[11px] text-ink-500">{desc}</div>
+    </button>
+  );
+}
+
+// ----- ADD JOB MODAL -----
+function AddJobModal({ open, onClose, onAdd, apiKey, glmApiKey, provider }) {
+  const blank = {
+    company: '', role: '', department: '', city: '', salary: '',
+    salaryMin: 0, salaryMax: 0, status: 'planning', priority: 'medium',
+    track: 'ai', source: '', deadline: '', appliedAt: null, jd: '',
+    tags: [], materials: [], timeline: [], nextAction: '',
+  };
+  const [form, setForm] = useState(blank);
+  const [parsing, setParsing] = useState(false);
+  const [jdToParse, setJdToParse] = useState('');
+  const [parseError, setParseError] = useState('');
+
+  useEffect(() => { if (open) { setForm(blank); setJdToParse(''); setParseError(''); } }, [open]);
+
+  const activeKey = provider === 'gemini' ? apiKey : glmApiKey;
+  const providerCfg = AI_PROVIDERS[provider] || AI_PROVIDERS.glm;
+
+  const parseJD = async () => {
+    if (!jdToParse.trim()) return;
+    if (!activeKey) {
+      setParseError(`请先在设置中配置 ${providerCfg.name} API Key`);
+      return;
+    }
+    setParsing(true);
+    setParseError('');
+    try {
+      const prompt = `请从以下招聘JD中提取结构化信息,严格以JSON格式返回,不要任何额外解释文字:
+
+{
+  "company": "公司名",
+  "role": "岗位名称",
+  "department": "部门(如果有)",
+  "city": "工作城市",
+  "salaryMin": 最低月薪数字(单位K),
+  "salaryMax": 最高月薪数字(单位K),
+  "salary": "薪资描述(如25-40K·15薪)",
+  "tags": ["关键词1", "关键词2", "关键词3"]
+}
+
+JD内容:
+${jdToParse}`;
+      const result = await callAI(provider, activeKey, prompt);
+      // Extract JSON from response
+      const jsonMatch = result.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('解析失败,未找到JSON格式输出');
+      const parsed = JSON.parse(jsonMatch[0]);
+      setForm(f => ({ ...f, ...parsed, jd: jdToParse }));
+    } catch (e) {
+      setParseError(e.message);
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  const submit = () => {
+    if (!form.company || !form.role) {
+      alert('请至少填写公司和岗位名称');
+      return;
+    }
+    const newJob = {
+      ...form,
+      id: genId(),
+      tags: typeof form.tags === 'string' ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : form.tags,
+    };
+    onAdd(newJob);
+    onClose();
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} size="lg" subtitle="Add New Opportunity" title="新增岗位">
+      <div className="space-y-5">
+        {/* AI Parse Section */}
+        <div className="border border-ink-900 rounded-sm p-4 bg-gradient-to-br from-accent-orange/5 to-transparent">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-accent-orange font-mono">AI 加速</span>
+            <div className="h-px flex-1 bg-ink-200"></div>
+          </div>
+          <div className="font-display text-lg mb-2">粘贴JD, AI自动填充表单</div>
+          <textarea
+            value={jdToParse}
+            onChange={(e) => setJdToParse(e.target.value)}
+            placeholder="把招聘JD粘贴到这里,Gemini会自动提取公司、岗位、薪资、城市、关键词..."
+            className="w-full h-24 p-3 text-sm border border-ink-200 rounded-sm focus:border-accent-orange outline-none font-sans"
+          ></textarea>
+          <div className="flex items-center justify-between mt-2">
+            <div className="text-xs text-ink-500">
+              {activeKey ? `✓ 使用 ${providerCfg.name} · ${providerCfg.badge}` : `⚠ 未配置 ${providerCfg.name} Key,请先在设置中添加`}
+            </div>
+            <button
+              onClick={parseJD}
+              disabled={parsing || !jdToParse.trim()}
+              className="px-4 py-2 bg-ink-900 text-ink-50 text-sm rounded-sm hover:bg-ink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {parsing ? (<><LoadingDots /> AI解析中...</>) : '✨ AI 解析'}
+            </button>
+          </div>
+          {parseError && (
+            <div className="mt-2 text-xs text-accent-rust bg-accent-rust/10 p-2 rounded-sm">
+              {parseError}
+            </div>
+          )}
+        </div>
+
+        {/* Form */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="公司 *" value={form.company} onChange={v => setForm({...form, company: v})} />
+          <Field label="岗位名称 *" value={form.role} onChange={v => setForm({...form, role: v})} />
+          <Field label="部门" value={form.department} onChange={v => setForm({...form, department: v})} />
+          <Field label="城市" value={form.city} onChange={v => setForm({...form, city: v})} />
+          <Field label="薪资" value={form.salary} onChange={v => setForm({...form, salary: v})} placeholder="如: 25-35K · 15薪" />
+          <Field label="渠道" value={form.source} onChange={v => setForm({...form, source: v})} placeholder="如: 校招官网、内推" />
+          <FieldDate label="截止日期" value={form.deadline} onChange={v => setForm({...form, deadline: v})} />
+          <FieldSelect label="赛道" value={form.track} onChange={v => setForm({...form, track: v})} options={
+            Object.entries(TRACKS).map(([k, v]) => ({ value: k, label: v.label }))
+          } />
+          <FieldSelect label="优先级" value={form.priority} onChange={v => setForm({...form, priority: v})} options={
+            Object.entries(PRIORITY).map(([k, v]) => ({ value: k, label: v.label }))
+          } />
+          <FieldSelect label="状态" value={form.status} onChange={v => setForm({...form, status: v})} options={
+            STATUSES.map(s => ({ value: s.id, label: s.label }))
+          } />
+        </div>
+
+        <Field label="标签" value={Array.isArray(form.tags) ? form.tags.join(', ') : form.tags} onChange={v => setForm({...form, tags: v})} placeholder="用逗号分隔" />
+
+        <div>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-1 block">JD详情</label>
+          <textarea
+            value={form.jd}
+            onChange={e => setForm({...form, jd: e.target.value})}
+            className="w-full h-24 p-3 text-sm border border-ink-200 rounded-sm focus:border-accent-orange outline-none"
+          ></textarea>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4 border-t border-ink-200">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-ink-600 hover:bg-ink-100 rounded-sm">取消</button>
+          <button onClick={submit} className="px-5 py-2 bg-accent-orange text-ink-50 text-sm rounded-sm hover:bg-accent-rust">添加岗位</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function Field({ label, value, onChange, placeholder, type = 'text' }) {
+  return (
+    <div>
+      <label className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-1 block">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 text-sm border border-ink-200 rounded-sm focus:border-accent-orange outline-none"
+      />
+    </div>
+  );
+}
+
+function FieldDate({ label, value, onChange }) {
+  return <Field label={label} value={value || ''} onChange={onChange} type="date" />;
+}
+
+function FieldSelect({ label, value, onChange, options }) {
+  return (
+    <div>
+      <label className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-1 block">{label}</label>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full px-3 py-2 text-sm border border-ink-200 rounded-sm focus:border-accent-orange outline-none bg-ink-50"
+      >
+        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+    </div>
+  );
+}
+
+// ----- SETTINGS MODAL -----
+function SettingsModal({ open, onClose, apiKey, onApiKeyChange, glmApiKey, onGlmApiKeyChange, provider, onProviderChange, resume, onResumeChange }) {
+  const [geminiKey, setGeminiKey] = useState(apiKey);
+  const [glmKey, setGlmKey] = useState(glmApiKey);
+  const [res, setRes] = useState(resume);
+  const [testing, setTesting] = useState(null); // null | 'gemini' | 'glm'
+  const [testResult, setTestResult] = useState({ gemini: null, glm: null });
+
+  useEffect(() => {
+    setGeminiKey(apiKey);
+    setGlmKey(glmApiKey);
+    setRes(resume);
+    setTestResult({ gemini: null, glm: null });
+  }, [open, apiKey, glmApiKey, resume]);
+
+  const testProviderKey = async (providerId) => {
+    setTesting(providerId);
+    setTestResult(r => ({ ...r, [providerId]: null }));
+    try {
+      const key = providerId === 'gemini' ? geminiKey : glmKey;
+      await callAI(providerId, key, '说"hello"两个字');
+      setTestResult(r => ({ ...r, [providerId]: { ok: true, msg: '✓ API Key 有效' } }));
+    } catch (e) {
+      setTestResult(r => ({ ...r, [providerId]: { ok: false, msg: e.message } }));
+    } finally {
+      setTesting(null);
+    }
+  };
+
+  const save = () => {
+    onApiKeyChange(geminiKey);
+    onGlmApiKeyChange(glmKey);
+    onResumeChange(res);
+    onClose();
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} size="md" subtitle="Preferences" title="设置">
+      <div className="space-y-5">
+        {/* Default Provider selector */}
+        <div>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-2 block">
+            默认 AI 引擎
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.values(AI_PROVIDERS).map(p => {
+              const isActive = provider === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => onProviderChange(p.id)}
+                  className={`relative text-left p-3 rounded-lg border-2 transition-all ${
+                    isActive
+                      ? 'border-brand-500 bg-brand-50/50 shadow-sm'
+                      : 'border-ink-200 bg-white hover:border-ink-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xl">{p.icon}</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-ink-900">{p.name}</div>
+                      <div className="text-[10px] text-ink-500">{p.vendor}</div>
+                    </div>
+                    {isActive && (
+                      <span className="w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center text-white text-xs">✓</span>
+                    )}
+                  </div>
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                    style={{ background: `${p.badgeColor}20`, color: p.badgeColor }}
+                  >{p.badge}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* GLM API Key */}
+        <div>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-2 block">
+            🇨🇳 智谱 GLM API Key <span className="text-brand-500 normal-case ml-1">国内稳定首选</span>
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              value={glmKey}
+              onChange={e => setGlmKey(e.target.value)}
+              placeholder="从 bigmodel.cn 获取..."
+              className="flex-1 px-3 py-2 text-sm font-mono border border-ink-200 rounded-md focus:border-brand-500 outline-none"
+            />
+            <button
+              onClick={() => testProviderKey('glm')}
+              disabled={testing === 'glm' || !glmKey}
+              className="px-3 py-2 text-sm border border-ink-300 rounded-md hover:bg-ink-100 disabled:opacity-50"
+            >
+              {testing === 'glm' ? <LoadingDots /> : '测试'}
+            </button>
+          </div>
+          {testResult.glm && (
+            <div className={`mt-2 text-xs p-2 rounded-md ${testResult.glm.ok ? 'text-brand-700 bg-brand-50 border border-brand-200' : 'text-accent-coral bg-accent-coral/10 border border-accent-coral/30'}`}>
+              {testResult.glm.msg}
+            </div>
+          )}
+          <div className="mt-2 text-xs text-ink-500 leading-relaxed">
+            没有 Key? <a href="https://open.bigmodel.cn/" target="_blank" rel="noopener" className="text-brand-600 hover:underline font-medium">前往智谱 AI 开放平台 免费申请 →</a>
+            <br/>GLM-4-Flash 完全免费 · 国内直连稳定 · 无需代理
+          </div>
+        </div>
+
+        {/* Gemini API Key */}
+        <div>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-2 block">
+            🌐 Gemini API Key <span className="text-accent-orange normal-case ml-1">需代理网络</span>
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              value={geminiKey}
+              onChange={e => setGeminiKey(e.target.value)}
+              placeholder="AIza..."
+              className="flex-1 px-3 py-2 text-sm font-mono border border-ink-200 rounded-md focus:border-accent-orange outline-none"
+            />
+            <button
+              onClick={() => testProviderKey('gemini')}
+              disabled={testing === 'gemini' || !geminiKey}
+              className="px-3 py-2 text-sm border border-ink-300 rounded-md hover:bg-ink-100 disabled:opacity-50"
+            >
+              {testing === 'gemini' ? <LoadingDots /> : '测试'}
+            </button>
+          </div>
+          {testResult.gemini && (
+            <div className={`mt-2 text-xs p-2 rounded-md ${testResult.gemini.ok ? 'text-brand-700 bg-brand-50 border border-brand-200' : 'text-accent-coral bg-accent-coral/10 border border-accent-coral/30'}`}>
+              {testResult.gemini.msg}
+            </div>
+          )}
+          <div className="mt-2 text-xs text-ink-500 leading-relaxed">
+            没有 Key? <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" className="text-accent-orange hover:underline font-medium">前往 Google AI Studio 申请 →</a>
+            <br/>⚠️ Gemini 在中国大陆需代理网络才能访问
+          </div>
+        </div>
+
+        <div className="text-[11px] text-ink-500 bg-ink-50 border border-ink-200 rounded-lg p-2.5 flex items-start gap-2">
+          <span>🔒</span>
+          <span>所有 API Key 仅存储在你的浏览器 LocalStorage 中,不会上传任何服务器。</span>
+        </div>
+
+        {/* Resume */}
+        <div>
+          <label className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono mb-2 block">
+            简历内容 (用于 AI 匹配度分析)
+          </label>
+          <textarea
+            value={res}
+            onChange={e => setRes(e.target.value)}
+            placeholder="把你的简历文本粘贴到这里..."
+            className="w-full h-40 p-3 text-xs border border-ink-200 rounded-md focus:border-brand-500 outline-none font-sans"
+          ></textarea>
+          <div className="mt-1 text-xs text-ink-500">
+            {res.length} 字符 · 简历越详细,AI 匹配度分析越准确
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4 border-t border-ink-200">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-ink-600 hover:bg-ink-100 rounded-md">取消</button>
+          <button onClick={save} className="px-5 py-2 ai-gradient-btn text-white text-sm rounded-md font-semibold">保存</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ----- AI HUB MODAL (global AI entry point) -----
+function AIHubModal({ open, onClose, jobs, onSelectJobAndMode, apiKey, glmApiKey, provider, onProviderChange, resume }) {
+  const [step, setStep] = useState('pick-mode'); // pick-mode -> pick-job
+  const [selectedMode, setSelectedMode] = useState(null);
+
+  useEffect(() => {
+    if (open) { setStep('pick-mode'); setSelectedMode(null); }
+  }, [open]);
+
+  const modes = [
+    {
+      id: 'jd',
+      icon: '◎',
+      title: 'JD 智能解析',
+      desc: '提取核心要求与关键词,看清岗位真实画像',
+      color: 'from-brand-500 to-accent-mint',
+    },
+    {
+      id: 'match',
+      icon: '⚖',
+      title: '简历匹配度',
+      desc: '评分+优势分析+能力缺口,要不要投一目了然',
+      color: 'from-accent-sky to-accent-violet',
+      requiresResume: true,
+    },
+    {
+      id: 'interview',
+      icon: '✦',
+      title: '面试题预测',
+      desc: '10道高频问题+回答思路,面试前30分钟过一遍',
+      color: 'from-accent-orange to-accent-coral',
+    },
+  ];
+
+  const pickMode = (m) => {
+    if (m.requiresResume && !resume) {
+      alert('请先在设置中填写简历内容,才能使用匹配度分析');
+      return;
+    }
+    setSelectedMode(m.id);
+    setStep('pick-job');
+  };
+
+  const pickJob = (job) => {
+    onSelectJobAndMode(selectedMode, job);
+    onClose();
+  };
+
+  const selectedModeObj = modes.find(m => m.id === selectedMode);
+
+  const activeKey = provider === 'gemini' ? apiKey : glmApiKey;
+  const providerCfg = AI_PROVIDERS[provider] || AI_PROVIDERS.glm;
+
+  return (
+    <Modal open={open} onClose={onClose} size="lg" subtitle="AI Copilot Hub" title="AI 智能助手">
+      <div className="space-y-4">
+        {/* Inline Provider Switcher - Dual Engine */}
+        {onProviderChange && (
+          <div className="bg-gradient-to-r from-ink-50 to-brand-50/30 border border-ink-200 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono font-semibold">
+                ⚙ AI 引擎
+              </div>
+              <div className="text-[10px] text-ink-400">可随时切换</div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.values(AI_PROVIDERS).map(p => {
+                const isActive = provider === p.id;
+                const keyReady = p.id === 'gemini' ? !!apiKey : !!glmApiKey;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => onProviderChange(p.id)}
+                    className={`relative text-left p-2.5 rounded-lg border-2 transition-all ${
+                      isActive
+                        ? 'border-brand-500 bg-white shadow-sm'
+                        : 'border-ink-200 bg-white/60 hover:border-ink-300'
+                    } ${!keyReady ? 'opacity-60' : ''}`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-base">{p.icon}</span>
+                        <span className="text-xs font-semibold text-ink-900">{p.name}</span>
+                      </div>
+                      {isActive && (
+                        <span className="w-4 h-4 bg-brand-500 rounded-full flex items-center justify-center text-white text-[10px]">✓</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px]">
+                      <span
+                        className="px-1.5 py-0.5 rounded-full font-semibold"
+                        style={{ background: `${p.badgeColor}20`, color: p.badgeColor }}
+                      >{p.badge}</span>
+                      <span className="text-ink-500">{p.vendor}</span>
+                    </div>
+                    {!keyReady && (
+                      <div className="text-[9px] text-accent-coral mt-1">⚠ 未配置 Key</div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* API key warning (current provider only) */}
+        {!activeKey && (
+          <div className="flex items-start gap-2 p-3 bg-accent-coral/10 border border-accent-coral/30 rounded-lg text-xs text-ink-700">
+            <span className="text-accent-coral">⚠</span>
+            <span>你还没配置 {providerCfg.name} API Key。点右上角 ⚙ 齿轮前往设置,免费申请 Key 后回来使用。</span>
+          </div>
+        )}
+
+        {/* Persistent reminder */}
+        <div className="flex items-start gap-2 p-2.5 bg-accent-sunny/10 border border-accent-sunny/30 rounded-lg text-xs text-ink-700">
+          <span className="text-accent-orange">💡</span>
+          <span>AI 调用偶尔会因高峰期限流失败。如果返回空或报错,多点几次通常就能成功。</span>
+        </div>
+
+        {step === 'pick-mode' && (
+          <>
+            <div className="text-xs text-ink-600 mb-2">选一项AI功能开始使用 ↓</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {modes.map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => pickMode(m)}
+                  disabled={!activeKey}
+                  className={`text-left p-4 rounded-xl border border-ink-200 bg-white hover:border-brand-500 hover:shadow-lg hover:-translate-y-0.5 transition-all group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none`}
+                >
+                  <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${m.color} opacity-10 group-hover:opacity-20 transition-opacity`}></div>
+                  <div className={`inline-flex w-10 h-10 items-center justify-center rounded-lg bg-gradient-to-br ${m.color} text-white text-lg mb-3 shadow-md`}>
+                    {m.icon}
+                  </div>
+                  <div className="font-semibold text-sm text-ink-900 mb-1">{m.title}</div>
+                  <div className="text-[11px] text-ink-500 leading-relaxed">{m.desc}</div>
+                  {m.requiresResume && (
+                    <div className="mt-2 text-[9px] uppercase tracking-wider text-accent-orange font-mono">需要简历</div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 'pick-job' && (
+          <>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={() => setStep('pick-mode')}
+                className="text-xs text-ink-500 hover:text-ink-900"
+              >← 返回</button>
+              <div className="text-xs text-ink-600">已选:<span className="font-semibold text-ink-900">{selectedModeObj?.title}</span>,请选择要分析的岗位 ↓</div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto pr-2">
+              {jobs.map(job => {
+                const track = TRACKS[job.track] || TRACKS.ai;
+                return (
+                  <button
+                    key={job.id}
+                    onClick={() => pickJob(job)}
+                    className="text-left p-3 rounded-lg border border-ink-200 bg-white hover:border-brand-500 hover:bg-brand-50 transition-all group"
+                  >
+                    <div className="flex items-start gap-2">
+                      <div className="w-1 h-12 rounded-full shrink-0" style={{ background: track.color }}></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-ink-500">{job.company}</div>
+                        <div className="text-sm font-semibold text-ink-900 truncate">{job.role}</div>
+                        <div className="text-[10px] text-ink-500 mt-0.5">{job.city} · {job.salary.split(' · ')[0]}</div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+// ----- FLOATING ACTION BUTTON (bottom-right AI entry) -----
+function FloatingAIButton({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="fab-btn fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full ai-gradient-btn text-white text-2xl shadow-xl shadow-brand-500/30 flex items-center justify-center float-bounce"
+      title="AI 助手"
+      aria-label="打开 AI 助手"
+    >
+      <span className="sparkle-icon">✦</span>
+      <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent-coral rounded-full border-2 border-white"></span>
+    </button>
+  );
+}
+
+// ----- EMAIL INBOX MODAL (Beta feature: mock UI only) -----
+function EmailInboxModal({ open, onClose, onEmailLinked }) {
+  // stage: 'providers' -> 'oauth' -> 'syncing' -> 'inbox'
+  const [stage, setStage] = useState('providers');
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [syncProgress, setSyncProgress] = useState(0);
+
+  useEffect(() => {
+    if (open) {
+      setStage('providers');
+      setSelectedProvider(null);
+      setSyncProgress(0);
+    }
+  }, [open]);
+
+  // Fake sync progress
+  useEffect(() => {
+    if (stage !== 'syncing') return;
+    let p = 0;
+    const interval = setInterval(() => {
+      p += Math.random() * 18 + 8;
+      if (p >= 100) {
+        p = 100;
+        setSyncProgress(100);
+        clearInterval(interval);
+        setTimeout(() => setStage('inbox'), 500);
+      } else {
+        setSyncProgress(Math.round(p));
+      }
+    }, 320);
+    return () => clearInterval(interval);
+  }, [stage]);
+
+  const providers = [
+    { id: 'gmail',   name: 'Gmail',          icon: 'G', color: '#ea4335', hint: '最常用的海外邮箱' },
+    { id: 'outlook', name: 'Outlook',        icon: 'O', color: '#0078d4', hint: '学校/企业邮箱' },
+    { id: 'qq',      name: 'QQ 邮箱',         icon: 'Q', color: '#1ebffc', hint: 'QQ 账号登录' },
+    { id: '163',     name: '网易邮箱',        icon: '网', color: '#d6000d', hint: '163/126 邮箱' },
+    { id: 'edu',     name: '校园邮箱',       icon: '校', color: '#7c3aed', hint: '学校 @*.edu.cn' },
+    { id: 'custom',  name: '其他 IMAP',       icon: '⚙', color: '#64748b', hint: '自定义邮箱服务器' },
+  ];
+
+  const pickProvider = (p) => {
+    setSelectedProvider(p);
+    setStage('oauth');
+  };
+
+  const approveOAuth = () => {
+    setStage('syncing');
+  };
+
+  // Fake email data for inbox preview
+  const fakeEmails = [
+    { from: 'talent@bytedance.com', subject: '【字节跳动】AI产品经理二面邀请通知', time: '2小时前', type: 'interview', matched: '字节跳动 · AI产品经理', unread: true },
+    { from: 'campus@alibaba-inc.com', subject: '阿里云通义千问 AI运营 - 笔试结果通知', time: '昨天', type: 'result', matched: '阿里云 · AI产品运营' },
+    { from: 'hr@meituan.com', subject: '【美团】恭喜通过终面 · Offer 意向书', time: '3天前', type: 'offer', matched: '美团 · AI产品经理', unread: true },
+    { from: 'noreply@lagou.com', subject: '腾讯 元宝产品策划 - 简历已查看', time: '4天前', type: 'update', matched: '腾讯 · 产品策划' },
+    { from: 'campus@sangfor.com', subject: '深信服 售前产品经理 · 终面时间确认', time: '5天前', type: 'interview', matched: '深信服 · 售前产品经理' },
+    { from: 'talent@nio.com', subject: '蔚来 AI产品经理 笔试邀请 - 请于 4/21 前完成', time: '6天前', type: 'test', matched: '蔚来 · AI产品经理' },
+  ];
+
+  const typeStyle = {
+    interview: { label: '面试邀请', color: '#a78bfa', bg: '#ede9fe' },
+    offer:     { label: 'Offer',   color: '#10b981', bg: '#d1fae5' },
+    result:    { label: '笔试结果', color: '#3b82f6', bg: '#dbeafe' },
+    update:    { label: '进度更新', color: '#64748b', bg: '#f1f5f9' },
+    test:      { label: '笔试邀请', color: '#f59e0b', bg: '#fef3c7' },
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      size="lg"
+      subtitle={stage === 'providers' ? 'Connect Inbox · Beta' : stage === 'oauth' ? 'Authorize Access' : stage === 'syncing' ? 'Syncing Emails' : 'Smart Inbox · Demo'}
+      title={stage === 'providers' ? '连接投递邮箱' : stage === 'oauth' ? `授权 ${selectedProvider?.name}` : stage === 'syncing' ? '正在同步邮件' : '智能收件箱'}
+    >
+      {/* Stage 1: Pick provider */}
+      {stage === 'providers' && (
+        <div className="space-y-5">
+          {/* Product pitch */}
+          <div className="p-4 rounded-xl bg-gradient-to-br from-brand-50 to-blue-50 border border-brand-200">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">📬</div>
+              <div className="flex-1">
+                <div className="font-semibold text-ink-900 mb-1">让 AI 接管你的求职邮件</div>
+                <div className="text-xs text-ink-600 leading-relaxed">
+                  连接邮箱后,AI 将自动识别招聘邮件、HR 回复、面试邀请,并智能同步到你的看板。告别在上百封邮件里翻找 Offer 的痛苦。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Feature bullets */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {[
+              { icon: '🔍', text: '自动识别与分类招聘邮件' },
+              { icon: '📅', text: '面试邀请一键加入日历' },
+              { icon: '⚡', text: '同公司多封邮件智能合并' },
+              { icon: '🛡️', text: '端到端加密,内容不存储' },
+            ].map((f, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-ink-700 p-2 bg-ink-50 rounded-lg">
+                <span>{f.icon}</span><span>{f.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Providers */}
+          <div>
+            <div className="text-xs text-ink-600 mb-2">选择你的邮箱服务 ↓</div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {providers.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => pickProvider(p)}
+                  className="flex items-center gap-3 p-3 bg-white border border-ink-200 rounded-xl hover:border-brand-500 hover:shadow-md transition-all text-left group"
+                >
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-semibold text-white shrink-0 text-sm"
+                    style={{ background: p.color }}
+                  >{p.icon}</div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-ink-900 truncate">{p.name}</div>
+                    <div className="text-[10px] text-ink-500 truncate">{p.hint}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Beta disclaimer */}
+          <div className="text-[11px] text-ink-500 bg-accent-sunny/10 border border-accent-sunny/30 rounded-lg p-3 flex items-start gap-2">
+            <span>🧪</span>
+            <span><strong className="text-ink-700">Beta 演示:</strong>此功能为交互原型,演示产品完整形态。正式版需接入各邮箱 OAuth / IMAP 服务。邮件内容将全程加密处理,用后即删,不存储到服务器。</span>
+          </div>
+        </div>
+      )}
+
+      {/* Stage 2: OAuth approval */}
+      {stage === 'oauth' && (
+        <div className="space-y-5">
+          <div className="text-center py-6">
+            <div className="inline-flex w-16 h-16 rounded-2xl items-center justify-center mb-4 text-white text-2xl font-semibold" style={{ background: selectedProvider.color }}>
+              {selectedProvider.icon}
+            </div>
+            <div className="font-display text-2xl mb-2">{selectedProvider.name} 授权</div>
+            <div className="text-sm text-ink-500">JobTrack AI 希望访问您的邮箱</div>
+          </div>
+
+          <div className="border border-ink-200 rounded-xl p-4 bg-ink-50 space-y-2">
+            <div className="text-xs font-semibold text-ink-700 mb-2">此应用将可以:</div>
+            {[
+              '读取收件箱邮件的主题与正文',
+              '识别招聘相关邮件并提取关键信息',
+              '不能发送邮件,不能删除邮件',
+              '不能访问任何非招聘类邮件',
+            ].map((p, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs text-ink-600">
+                <span className={i < 2 ? 'text-brand-500' : 'text-ink-400'}>{i < 2 ? '✓' : '✗'}</span>
+                <span>{p}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setStage('providers')}
+              className="flex-1 py-2.5 text-sm font-medium text-ink-600 border border-ink-300 hover:bg-ink-100 rounded-xl"
+            >取消</button>
+            <button
+              onClick={approveOAuth}
+              className="flex-1 py-2.5 text-sm font-semibold ai-gradient-btn text-white rounded-xl shadow-md"
+            >允许访问</button>
+          </div>
+
+          <div className="text-[11px] text-center text-ink-400">🧪 演示环境 · 此授权不会实际连接邮箱</div>
+        </div>
+      )}
+
+      {/* Stage 3: Syncing */}
+      {stage === 'syncing' && (
+        <div className="py-10 text-center space-y-4">
+          <div className="inline-flex w-16 h-16 rounded-2xl items-center justify-center mb-2 text-3xl bg-gradient-to-br from-brand-500 to-accent-sky text-white animate-pulse">
+            📬
+          </div>
+          <div className="font-display text-2xl">正在同步邮件</div>
+          <div className="text-sm text-ink-500">已连接 {selectedProvider?.name},正在筛选招聘相关邮件...</div>
+          <div className="max-w-sm mx-auto">
+            <div className="h-2 bg-ink-100 rounded-full overflow-hidden">
+              <div
+                className="h-full ai-gradient-btn transition-all duration-300"
+                style={{ width: `${syncProgress}%` }}
+              ></div>
+            </div>
+            <div className="text-xs font-mono text-ink-500 mt-2">{syncProgress}% · 已扫描约 {Math.round(syncProgress * 3.2)} 封邮件</div>
+          </div>
+        </div>
+      )}
+
+      {/* Stage 4: Inbox demo */}
+      {stage === 'inbox' && (
+        <div className="space-y-4">
+          {/* Success banner */}
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-brand-50 border border-brand-200">
+            <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold">✓</div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-ink-900">已连接 {selectedProvider?.name}</div>
+              <div className="text-[11px] text-ink-600">从 327 封邮件中识别到 <span className="font-semibold text-brand-600">{fakeEmails.length}</span> 封求职相关邮件</div>
+            </div>
+            <button
+              onClick={() => setStage('providers')}
+              className="text-[10px] text-ink-500 hover:text-ink-900 underline"
+            >更换邮箱</button>
+          </div>
+
+          {/* Email list */}
+          <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
+            {fakeEmails.map((e, i) => {
+              const typeCfg = typeStyle[e.type] || typeStyle.update;
+              return (
+                <div
+                  key={i}
+                  className={`p-3 rounded-xl border transition-all hover:border-brand-400 hover:shadow-sm cursor-pointer ${
+                    e.unread ? 'bg-white border-ink-300' : 'bg-ink-50 border-ink-200'
+                  }`}
+                >
+                  <div className="flex items-start gap-2 mb-1">
+                    {e.unread && <span className="w-2 h-2 bg-brand-500 rounded-full mt-1.5 shrink-0"></span>}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <Badge size="xs" color={typeCfg.color} bg={typeCfg.bg}>{typeCfg.label}</Badge>
+                        <span className="text-[10px] font-mono text-ink-500 truncate">{e.from}</span>
+                      </div>
+                      <div className={`text-sm leading-snug ${e.unread ? 'text-ink-900 font-semibold' : 'text-ink-700'}`}>
+                        {e.subject}
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <div className="text-[10px] text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full inline-block">
+                          🔗 关联到:{e.matched}
+                        </div>
+                        <div className="text-[10px] text-ink-400 font-mono">{e.time}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="text-[11px] text-ink-500 bg-accent-sunny/10 border border-accent-sunny/30 rounded-lg p-3 flex items-start gap-2">
+            <span>🧪</span>
+            <span><strong className="text-ink-700">演示数据:</strong>上方为产品完整形态下的效果预览。正式版会在此处显示真实同步的邮件,点击邮件可查看详情,并一键更新对应岗位的状态与时间线。</span>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-ink-200">
+            <div className="text-[10px] text-ink-500">📅 每 15 分钟自动同步一次</div>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm bg-ink-900 text-white rounded-lg hover:bg-ink-700"
+            >完成</button>
+          </div>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+// ----- AI MODALS -----
+function AIModal({ open, onClose, mode, job, apiKey, glmApiKey, provider, onProviderChange, resume, onModeChange }) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
+
+  const config = {
+    jd: {
+      title: 'JD 智能解析',
+      subtitle: 'AI · JD Analysis',
+      icon: '◎',
+      desc: 'AI将从JD中提取核心要求、技能关键词、加分项',
+    },
+    match: {
+      title: '简历匹配度分析',
+      subtitle: 'AI · Match Score',
+      icon: '⚖',
+      desc: '对比岗位要求和你的简历,生成匹配评分与能力缺口分析',
+    },
+    interview: {
+      title: '面试题预测',
+      subtitle: 'AI · Interview Prep',
+      icon: '✦',
+      desc: '基于岗位特性和公司风格,预测10个高频面试问题',
+    },
+  };
+
+  const cfg = config[mode] || config.jd;
+
+  const run = async () => {
+    if (!apiKey) { setError('请先在设置中配置Gemini API Key'); return; }
+    if (!job) return;
+
+    setLoading(true);
+    setError('');
+    setResult(null);
+
+    let prompt = '';
+    let systemInstruction = '';
+
+    if (mode === 'jd') {
+      systemInstruction = '你是一位资深HR和招聘专家,擅长从JD中提取结构化的核心信息,输出简洁、专业。';
+      prompt = `请从以下招聘JD中提取核心信息,用清晰的结构化markdown格式输出:
+
+## 核心职责
+(列出3-5条)
+
+## 硬性要求
+(列出候选人必须具备的条件)
+
+## 软性要求/加分项
+(列出加分条件)
+
+## 核心技能关键词
+(用逗号分隔的标签形式)
+
+## 潜在考察方向
+(推测公司最可能考察的能力维度)
+
+---
+**岗位**: ${job.company} · ${job.role}
+**JD原文**:
+${job.jd}`;
+    } else if (mode === 'match') {
+      if (!resume) { setError('请先在设置中填写简历内容'); setLoading(false); return; }
+      systemInstruction = '你是一位资深职业顾问,擅长评估候选人与岗位的匹配度,给出客观、具体、可操作的建议。';
+      prompt = `请对比以下候选人简历和岗位JD,给出专业的匹配度分析:
+
+## 综合匹配度评分
+(0-100分,并说明评分依据)
+
+## 优势匹配项
+(列出候选人与岗位的强匹配点,至少3条)
+
+## 能力缺口
+(列出明显的缺口或劣势,并给出弥补建议)
+
+## 投递建议
+(是否建议投递、投递策略、简历突出重点、面试准备方向)
+
+---
+## 候选人简历:
+${resume}
+
+## 岗位JD:
+公司: ${job.company}
+岗位: ${job.role}
+城市: ${job.city}
+JD: ${job.jd}`;
+    } else if (mode === 'interview') {
+      systemInstruction = '你是一位经验丰富的面试官和求职教练,擅长预测特定岗位和公司的面试题目。';
+      prompt = `请基于以下岗位信息,预测10个最可能被问到的面试题,并给出回答思路:
+
+## 公司业务理解类 (3题)
+1. 问题 + 回答框架
+2. ...
+3. ...
+
+## 岗位能力考察类 (4题)
+4. ...
+5. ...
+6. ...
+7. ...
+
+## 项目/经验深挖类 (2题)
+8. ...
+9. ...
+
+## 开放性/价值观类 (1题)
+10. ...
+
+每个问题简要说明考察意图,并给出2-3句话的回答思路提示。
+
+---
+**公司**: ${job.company}
+**岗位**: ${job.role}
+**赛道**: ${TRACKS[job.track]?.label || ''}
+**JD**: ${job.jd}`;
+    }
+
+    try {
+      const activeKey = provider === 'gemini' ? apiKey : glmApiKey;
+      const res = await callAI(provider, activeKey, prompt, systemInstruction);
+      setResult(res);
+      setRetryCount(0);
+    } catch (e) {
+      setError(e.message);
+      setRetryCount(c => c + 1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open && job) {
+      setResult(null);
+      setError('');
+      setRetryCount(0);
+      run();
+    }
+  }, [open, job, mode, provider]);
+
+  if (!job) return null;
+
+  // Convert markdown-ish text to HTML
+  const renderMarkdown = (md) => {
+    if (!md) return '';
+    const lines = md.split('\n');
+    let html = '';
+    let inList = false;
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('## ')) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h3>${escapeHtml(trimmed.slice(3))}</h3>`;
+      } else if (trimmed.startsWith('# ')) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h3>${escapeHtml(trimmed.slice(2))}</h3>`;
+      } else if (trimmed.match(/^[-*•]\s/)) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        html += `<li>${parseInline(trimmed.replace(/^[-*•]\s+/, ''))}</li>`;
+      } else if (trimmed.match(/^\d+\.\s/)) {
+        if (!inList) { html += '<ol>'; inList = true; }
+        html += `<li>${parseInline(trimmed.replace(/^\d+\.\s+/, ''))}</li>`;
+      } else if (trimmed === '---') {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += '<hr class="border-ink-200 my-3"/>';
+      } else if (trimmed === '') {
+        if (inList) { html += '</ul></ol>'; inList = false; }
+      } else {
+        if (inList) { html += '</ul></ol>'; inList = false; }
+        html += `<p>${parseInline(trimmed)}</p>`;
+      }
+    });
+    if (inList) html += '</ul>';
+    return html;
+  };
+
+  const escapeHtml = (s) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  const parseInline = (s) => escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Friendly error message with retry hint
+  const isRateLimit = error && (error.includes('429') || error.includes('rate') || error.includes('quota') || error.includes('limit'));
+  const isNetworkErr = error && (error.includes('Failed to fetch') || error.includes('NetworkError') || error.includes('CORS'));
+  const tabs = [
+    { id: 'jd',        label: 'JD解析',    icon: '◎' },
+    { id: 'match',     label: '匹配度',    icon: '⚖' },
+    { id: 'interview', label: '面试题',    icon: '✦' },
+  ];
+  const currentProvider = AI_PROVIDERS[provider] || AI_PROVIDERS.glm;
+  const activeKey = provider === 'gemini' ? apiKey : glmApiKey;
+
+  return (
+    <Modal open={open} onClose={onClose} size="lg" subtitle={cfg.subtitle} title={cfg.title}>
+      <div className="space-y-4">
+        {/* Tabs - mode switcher */}
+        {onModeChange && (
+          <div className="flex items-center gap-1 bg-ink-100 p-1 rounded-lg">
+            {tabs.map(t => (
+              <button
+                key={t.id}
+                onClick={() => onModeChange(t.id)}
+                className={`flex-1 px-3 py-1.5 text-xs font-medium transition-all rounded-md ${
+                  mode === t.id
+                    ? 'bg-white text-ink-900 shadow-sm'
+                    : 'text-ink-600 hover:text-ink-900'
+                }`}
+              >
+                <span className="mr-1">{t.icon}</span>{t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* AI Provider Switcher - Dual-Engine */}
+        {onProviderChange && (
+          <div className="bg-gradient-to-r from-ink-50 to-brand-50/30 border border-ink-200 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-ink-500 font-mono font-semibold">
+                ⚙ AI 引擎
+              </div>
+              <div className="text-[10px] text-ink-400">可切换 · 不同模型表现会有差异</div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.values(AI_PROVIDERS).map(p => {
+                const isActive = provider === p.id;
+                const keyReady = p.id === 'gemini' ? !!apiKey : !!glmApiKey;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => onProviderChange(p.id)}
+                    className={`relative text-left p-2.5 rounded-lg border-2 transition-all ${
+                      isActive
+                        ? 'border-brand-500 bg-white shadow-sm'
+                        : 'border-ink-200 bg-white/60 hover:border-ink-300'
+                    } ${!keyReady ? 'opacity-60' : ''}`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-base">{p.icon}</span>
+                        <span className="text-xs font-semibold text-ink-900">{p.name}</span>
+                      </div>
+                      {isActive && (
+                        <span className="w-4 h-4 bg-brand-500 rounded-full flex items-center justify-center text-white text-[10px]">✓</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px]">
+                      <span
+                        className="px-1.5 py-0.5 rounded-full font-semibold"
+                        style={{ background: `${p.badgeColor}20`, color: p.badgeColor }}
+                      >{p.badge}</span>
+                      <span className="text-ink-500">{p.vendor}</span>
+                    </div>
+                    {!keyReady && (
+                      <div className="text-[9px] text-accent-coral mt-1">⚠ 未配置 Key</div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {provider === 'gemini' && (
+              <div className="mt-2 flex items-start gap-1.5 text-[11px] text-accent-orange bg-accent-orange/10 rounded p-2">
+                <span>🌐</span>
+                <span>Gemini 需要代理网络环境访问。若在中国大陆直接访问会失败,建议切回 GLM。</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Context */}
+        <div className="p-3 bg-gradient-to-r from-brand-50 to-blue-50 rounded-lg text-sm border-l-4 border-brand-500">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-brand-600 font-mono mb-1">正在分析</div>
+          <div className="font-semibold text-ink-900">{job.company} · {job.role}</div>
+          <div className="text-xs text-ink-500 mt-0.5">{cfg.desc}</div>
+        </div>
+
+        {/* Helpful reminder (persistent) */}
+        {!error && (
+          <div className="flex items-start gap-2 p-2.5 bg-accent-sunny/10 border border-accent-sunny/30 rounded-lg text-xs text-ink-700">
+            <span className="text-accent-orange mt-0.5">💡</span>
+            <span>AI 调用偶尔会因高峰期限流失败。如果返回空或报错,多点几次「重新生成」通常就能成功。</span>
+          </div>
+        )}
+
+        {/* Body */}
+        {loading && (
+          <div className="py-12 text-center">
+            <div className="inline-block mb-3 text-4xl sparkle-icon">{cfg.icon}</div>
+            <div className="text-sm text-ink-600 mb-2">{currentProvider.name} 正在思考...</div>
+            <LoadingDots />
+            <div className="mt-4 text-xs text-ink-400 max-w-xs mx-auto">
+              AI 会仔细分析信息,预计 5-15 秒完成
+            </div>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="p-4 bg-accent-coral/10 border border-accent-coral/30 text-ink-700 text-sm rounded-lg">
+            <div className="flex items-start gap-2 mb-2">
+              <span className="text-accent-coral text-lg">⚠</span>
+              <div className="flex-1">
+                <div className="font-semibold text-accent-coral mb-1">
+                  {isNetworkErr && provider === 'gemini'
+                    ? 'Gemini 连接失败 (网络限制)'
+                    : isRateLimit ? 'API 调用过于频繁' : `${currentProvider.name} 调用失败`}
+                </div>
+                <div className="text-xs text-ink-600 leading-relaxed">
+                  {isNetworkErr && provider === 'gemini'
+                    ? '当前网络环境无法访问 Gemini API。建议上方切换到「GLM-4-Flash」(国内稳定),效果同样优秀。'
+                    : isRateLimit
+                    ? '免费额度有请求频率限制,稍等几秒再重试即可。通常多试 2-3 次就能成功。'
+                    : error}
+                </div>
+                {retryCount > 0 && (
+                  <div className="text-[10px] text-ink-500 mt-1 font-mono">已重试 {retryCount} 次</div>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={run}
+                className="px-4 py-2 ai-gradient-btn text-white text-xs font-semibold rounded-md"
+              >🔄 再试一次</button>
+              {isNetworkErr && provider === 'gemini' && onProviderChange && (
+                <button
+                  onClick={() => onProviderChange('glm')}
+                  className="px-4 py-2 bg-brand-500 text-white text-xs font-semibold rounded-md hover:bg-brand-600"
+                >🇨🇳 切换到 GLM</button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {result && !loading && (
+          <div
+            className="ai-prose p-4 bg-white border border-ink-200 rounded-lg max-h-[55vh] overflow-y-auto"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(result) }}
+          ></div>
+        )}
+
+        {result && !loading && (
+          <div className="flex items-center justify-between pt-3 border-t border-ink-200 text-xs text-ink-500">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></span>
+              <span>由 {currentProvider.name} ({currentProvider.vendor}) 生成 · 结果仅供参考</span>
+            </div>
+            <button onClick={run} className="px-3 py-1.5 border border-ink-300 hover:bg-ink-100 rounded-md font-medium">🔄 重新生成</button>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+// ----- ONBOARDING -----
+function Onboarding({ onStart }) {
+  return (
+    <div className="min-h-screen paper-bg flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full bg-white border border-ink-200 p-8 md:p-12 rounded-2xl fade-in-up shadow-xl shadow-brand-500/5">
+        <div className="text-[11px] uppercase tracking-[0.3em] text-brand-500 font-mono mb-3 font-semibold">
+          ✦ Welcome · 欢迎使用
+        </div>
+        <h1 className="font-display text-4xl md:text-5xl font-light leading-tight mb-4">
+          求职季的 <span className="italic bg-gradient-to-r from-brand-500 to-accent-sky bg-clip-text text-transparent">作战中枢</span>
+        </h1>
+        <p className="text-ink-600 text-base leading-relaxed mb-6">
+          JobTrack AI 是一款为校招求职者打造的<strong className="text-ink-900">AI原生</strong>申请管理工具。
+          看板、日历、数据分析一目了然,AI 帮你解析 JD、评估匹配度、预测面试题。
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+          <FeatureTile icon="⌘" title="智能看板" desc="6列Pipeline 拖拽管理" color="from-brand-500 to-accent-mint" />
+          <FeatureTile icon="◫" title="时间线日历" desc="截止与面试 一览无余" color="from-accent-sky to-accent-violet" />
+          <FeatureTile icon="✦" title="AI Copilot" desc="JD解析·匹配·面试题" color="from-accent-orange to-accent-coral" />
+        </div>
+        <button
+          onClick={onStart}
+          className="w-full py-3.5 ai-gradient-btn text-white text-base font-semibold hover:opacity-90 transition-opacity rounded-xl shadow-lg shadow-brand-500/25"
+        >
+          进入看板 →
+        </button>
+        <div className="mt-4 text-center text-xs text-ink-500">
+          首次使用 · 已预载 15 个示例岗位 · 所有数据仅存储在本地
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureTile({ icon, title, desc, color }) {
+  return (
+    <div className="p-3 bg-white rounded-xl border border-ink-200 hover:shadow-md transition-shadow">
+      <div className={`inline-flex w-9 h-9 items-center justify-center rounded-lg bg-gradient-to-br ${color || 'from-brand-500 to-accent-sky'} text-white text-lg mb-2 shadow-sm`}>
+        {icon}
+      </div>
+      <div className="font-semibold text-sm text-ink-900">{title}</div>
+      <div className="text-xs text-ink-500">{desc}</div>
+    </div>
+  );
+}
+
+// ========================================
+// MAIN APP
+// ========================================
+function App() {
+  const [jobs, setJobs] = useState(() => storage.get(STORAGE_KEYS.JOBS, DEMO_JOBS));
+  const [apiKey, setApiKey] = useState(() => {
+    const stored = storage.get(STORAGE_KEYS.API_KEY, '');
+    return stored || (DEMO_CONFIG.GEMINI_API_KEY.startsWith('AIza_在这里') ? '' : DEMO_CONFIG.GEMINI_API_KEY);
+  });
+  const [glmApiKey, setGlmApiKey] = useState(() => {
+    const stored = storage.get(STORAGE_KEYS.GLM_API_KEY, '');
+    return stored || (DEMO_CONFIG.GLM_API_KEY.startsWith('在这里') ? '' : DEMO_CONFIG.GLM_API_KEY);
+  });
+  const [provider, setProvider] = useState(() => storage.get(STORAGE_KEYS.PROVIDER, DEMO_CONFIG.DEFAULT_PROVIDER || 'glm'));
+  const [resume, setResume] = useState(() => {
+    const stored = storage.get(STORAGE_KEYS.RESUME, '');
+    return stored || DEMO_CONFIG.RESUME;
+  });
+  const [onboarded, setOnboarded] = useState(() => storage.get(STORAGE_KEYS.ONBOARDED, false));
+
+  const [view, setView] = useState('kanban');
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAIHub, setShowAIHub] = useState(false);
+  const [showEmailInbox, setShowEmailInbox] = useState(false);
+  const [aiModal, setAIModal] = useState({ open: false, mode: null, job: null });
+
+  // Persist jobs/api/resume
+  useEffect(() => { storage.set(STORAGE_KEYS.JOBS, jobs); }, [jobs]);
+  useEffect(() => { storage.set(STORAGE_KEYS.API_KEY, apiKey); }, [apiKey]);
+  useEffect(() => { storage.set(STORAGE_KEYS.GLM_API_KEY, glmApiKey); }, [glmApiKey]);
+  useEffect(() => { storage.set(STORAGE_KEYS.PROVIDER, provider); }, [provider]);
+  useEffect(() => { storage.set(STORAGE_KEYS.RESUME, resume); }, [resume]);
+
+  const stats = useMemo(() => {
+    const urgent = jobs.filter(j => {
+      if (j.status === 'offer' || j.status === 'closed') return false;
+      const d = daysUntil(j.deadline);
+      return d !== null && d >= 0 && d <= 7;
+    }).length;
+    return { total: jobs.length, urgent };
+  }, [jobs]);
+
+  const handleUpdateJob = (updated) => {
+    setJobs(js => js.map(j => j.id === updated.id ? updated : j));
+    if (selectedJob?.id === updated.id) setSelectedJob(updated);
+  };
+
+  const handleStatusChange = (jobId, newStatus) => {
+    setJobs(js => js.map(j => {
+      if (j.id !== jobId) return j;
+      const updated = { ...j, status: newStatus };
+      return updated;
+    }));
+  };
+
+  const handleAddJob = (newJob) => {
+    setJobs(js => [newJob, ...js]);
+  };
+
+  const handleDeleteJob = (jobId) => {
+    setJobs(js => js.filter(j => j.id !== jobId));
+  };
+
+  const handleOpenAI = (mode, job) => {
+    setAIModal({ open: true, mode, job });
+  };
+
+  // Quick AI from card (defaults to match if resume exists, else jd)
+  const handleAIQuickClick = (job) => {
+    const mode = resume ? 'match' : 'jd';
+    setAIModal({ open: true, mode, job });
+  };
+
+  // AI Hub picks both mode and job
+  const handleAIHubSelect = (mode, job) => {
+    setAIModal({ open: true, mode, job });
+  };
+
+  const handleStartOnboarding = () => {
+    setOnboarded(true);
+    storage.set(STORAGE_KEYS.ONBOARDED, true);
+  };
+
+  if (!onboarded) {
+    return <Onboarding onStart={handleStartOnboarding} />;
+  }
+
+  return (
+    <div className="min-h-screen paper-bg">
+      <Header
+        view={view}
+        onViewChange={setView}
+        onAdd={() => setShowAdd(true)}
+        onSettings={() => setShowSettings(true)}
+        onOpenAIHub={() => setShowAIHub(true)}
+        onOpenEmail={() => setShowEmailInbox(true)}
+        stats={stats}
+      />
+
+      <main>
+        {view === 'kanban' && (
+          <KanbanView
+            jobs={jobs}
+            onCardClick={setSelectedJob}
+            onStatusChange={handleStatusChange}
+            onAIQuickClick={handleAIQuickClick}
+          />
+        )}
+        {view === 'calendar' && (
+          <CalendarView
+            jobs={jobs}
+            onCardClick={setSelectedJob}
+          />
+        )}
+        {view === 'analytics' && (
+          <AnalyticsView jobs={jobs} />
+        )}
+      </main>
+
+      <footer className="mt-16 border-t border-ink-200 py-6 text-center text-xs text-ink-500">
+        <div className="font-display italic mb-1">JobTrack AI · Crafted for campus recruiters</div>
+        <div className="font-mono">v1.0 · Powered by Gemini 2.5 Flash · 所有数据仅存储在本地</div>
+      </footer>
+
+      {/* Floating AI Button */}
+      <FloatingAIButton onClick={() => setShowAIHub(true)} />
+
+      <JobDetailModal
+        job={selectedJob}
+        open={!!selectedJob}
+        onClose={() => setSelectedJob(null)}
+        onUpdate={handleUpdateJob}
+        onDelete={handleDeleteJob}
+        onOpenAI={handleOpenAI}
+      />
+
+      <AddJobModal
+        open={showAdd}
+        onClose={() => setShowAdd(false)}
+        onAdd={handleAddJob}
+        apiKey={apiKey}
+        glmApiKey={glmApiKey}
+        provider={provider}
+      />
+
+      <SettingsModal
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        apiKey={apiKey}
+        onApiKeyChange={setApiKey}
+        glmApiKey={glmApiKey}
+        onGlmApiKeyChange={setGlmApiKey}
+        provider={provider}
+        onProviderChange={setProvider}
+        resume={resume}
+        onResumeChange={setResume}
+      />
+
+      <AIHubModal
+        open={showAIHub}
+        onClose={() => setShowAIHub(false)}
+        jobs={jobs}
+        onSelectJobAndMode={handleAIHubSelect}
+        apiKey={apiKey}
+        glmApiKey={glmApiKey}
+        provider={provider}
+        onProviderChange={setProvider}
+        resume={resume}
+      />
+
+      <EmailInboxModal
+        open={showEmailInbox}
+        onClose={() => setShowEmailInbox(false)}
+      />
+
+      <AIModal
+        open={aiModal.open}
+        onClose={() => setAIModal({ open: false, mode: null, job: null })}
+        mode={aiModal.mode}
+        job={aiModal.job}
+        apiKey={apiKey}
+        glmApiKey={glmApiKey}
+        provider={provider}
+        onProviderChange={setProvider}
+        resume={resume}
+        onModeChange={(newMode) => setAIModal(s => ({ ...s, mode: newMode }))}
+      />
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
